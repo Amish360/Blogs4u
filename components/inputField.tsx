@@ -1,11 +1,11 @@
-import { useId } from "react"
-import { MailIcon } from "lucide-react"
+import { useId } from "react";
+import { MailIcon } from "lucide-react";
 
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-export default function Component() {
-  const id = useId()
+export default function InputField() {
+  const id = useId();
   return (
     <div className="*:not-first:mt-2">
       <Label htmlFor={id}>Input with end icon</Label>
@@ -16,5 +16,5 @@ export default function Component() {
         </div>
       </div>
     </div>
-  )
+  );
 }
