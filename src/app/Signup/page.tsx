@@ -1,77 +1,75 @@
 "use client";
-import React from "react";
+import React, { useState, FormEvent } from "react";
 import { LocateIcon, LockIcon, MailIcon, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
+type FormFields = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  address: string;
+  password: string;
+  confirmPassword: string;
+};
+
+type FormErrors = Partial<Record<keyof FormFields, string>>;
+
 const Signup = () => {
   const router = useRouter();
 
-  const [formData, setFormData] = React.useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    address: "",
-    password: "",
-    confirmPassword: "",
-  });
+  // Individual states
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  const validate = (): FormErrors => {
+    const newErrors: FormErrors = {};
+
+    if (!firstName.trim()) newErrors.firstName = "First Name is required";
+    if (!lastName.trim()) newErrors.lastName = "Last Name is required";
+    if (!email.trim()) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid";
+    if (!address.trim()) newErrors.address = "Address is required";
+    if (!password.trim()) newErrors.password = "Password is required";
+    if (!confirmPassword.trim())
+      newErrors.confirmPassword = "Confirm Password is required";
+    else if (password !== confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
+
+    return newErrors;
   };
 
-  const [error, setError] = React.useState<
-    Partial<Record<keyof typeof formData, string>>
-  >({});
-
-  const validate = () => {
-    const validationErrors: Partial<Record<keyof typeof formData, string>> = {};
-
-    if (!formData.firstName.trim()) {
-      validationErrors.firstName = "First Name is required";
-    }
-
-    if (!formData.lastName.trim()) {
-      validationErrors.lastName = "Last Name is required";
-    }
-
-    if (!formData.email.trim()) {
-      validationErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      validationErrors.email = "Email is invalid";
-    }
-
-    if (!formData.address.trim()) {
-      validationErrors.address = "Address is required";
-    }
-
-    if (!formData.password.trim()) {
-      validationErrors.password = "Password is required";
-    }
-
-    if (!formData.confirmPassword.trim()) {
-      validationErrors.confirmPassword = "Confirm Password is required";
-    } else if (formData.password !== formData.confirmPassword) {
-      validationErrors.confirmPassword = "Passwords do not match";
-    }
-
-    return validationErrors;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
-      setError(validationErrors);
+      setErrors(validationErrors);
       return;
     }
 
-    setError({});
-    console.log("Form submitted successfully", formData);
-    // Proceed with actual signup logic here
+    setErrors({});
+    const formData: FormFields = {
+      firstName,
+      lastName,
+      email,
+      address,
+      password,
+      confirmPassword,
+    };
+    console.log("Form Submitted:", formData);
+
+    // Handle signup logic
   };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-sm md:max-w-2xl bg-white rounded-2xl shadow-md p-10 border border-gray-300">
@@ -81,41 +79,40 @@ const Signup = () => {
           {/* First and Last Name */}
           <div className="flex space-x-4">
             <div className="w-full">
-              <Label htmlFor="first-name">First Name</Label>
+              <Label htmlFor="firstName">First Name</Label>
               <div className="relative mt-1">
                 <Input
                   id="firstName"
-                  className="peer pe-10"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   placeholder="First Name"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  type="text"
+                  className="peer pe-10"
                 />
-                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none text-muted-foreground/80">
+                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
                   <User size={16} />
                 </div>
               </div>
-              {error.firstName && (
-                <p className="text-red-500 text-sm mt-1">{error.firstName}</p>
+              {errors.firstName && (
+                <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
               )}
             </div>
+
             <div className="w-full">
-              <Label htmlFor="last-name">Last Name</Label>
+              <Label htmlFor="lastName">Last Name</Label>
               <div className="relative mt-1">
                 <Input
                   id="lastName"
-                  className="peer pe-10"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                   placeholder="Last Name"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  type="text"
+                  className="peer pe-10"
                 />
-                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none text-muted-foreground/80">
+                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
                   <User size={16} />
                 </div>
               </div>
-              {error.lastName && (
-                <p className="text-red-500 text-sm mt-1">{error.lastName}</p>
+              {errors.lastName && (
+                <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
               )}
             </div>
           </div>
@@ -127,92 +124,91 @@ const Signup = () => {
               <div className="relative mt-1">
                 <Input
                   id="email"
-                  className="peer pe-10"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email"
-                  value={formData.email}
-                  onChange={handleChange}
                   type="email"
+                  className="peer pe-10"
                 />
-                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none text-muted-foreground/80">
+                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
                   <MailIcon size={16} />
                 </div>
               </div>
-              {error.email && (
-                <p className="text-red-500 text-sm mt-1">{error.email}</p>
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
             </div>
+
             <div className="w-full">
               <Label htmlFor="address">Address</Label>
               <div className="relative mt-1">
                 <Input
                   id="address"
-                  className="peer pe-10"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
                   placeholder="Address"
-                  type="text"
-                  onChange={handleChange}
-                  value={formData.address}
+                  className="peer pe-10"
                 />
-                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none text-muted-foreground/80">
+                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
                   <LocateIcon size={16} />
                 </div>
               </div>
-              {error.address && (
-                <p className="text-red-500 text-sm mt-1">{error.address}</p>
+              {errors.address && (
+                <p className="text-red-500 text-sm mt-1">{errors.address}</p>
               )}
             </div>
           </div>
 
-          {/* Password and Confirm Password */}
+          {/* Passwords */}
           <div className="flex space-x-4">
             <div className="w-full">
               <Label htmlFor="password">Password</Label>
               <div className="relative mt-1">
                 <Input
                   id="password"
-                  className="peer pe-10"
-                  placeholder="Password"
-                  onChange={handleChange}
-                  value={formData.password}
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  className="peer pe-10"
                 />
-                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none text-muted-foreground/80">
+                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
                   <LockIcon size={16} />
                 </div>
               </div>
-              {error.password && (
-                <p className="text-red-500 text-sm mt-1">{error.password}</p>
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
               )}
             </div>
+
             <div className="w-full">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative mt-1">
                 <Input
                   id="confirmPassword"
-                  className="peer pe-10"
-                  placeholder="Confirm Password"
-                  onChange={handleChange}
-                  value={formData.confirmPassword}
                   type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm Password"
+                  className="peer pe-10"
                 />
-                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none text-muted-foreground/80">
+                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
                   <LockIcon size={16} />
                 </div>
               </div>
-              {error.confirmPassword && (
+              {errors.confirmPassword && (
                 <p className="text-red-500 text-sm mt-1">
-                  {error.confirmPassword}
+                  {errors.confirmPassword}
                 </p>
               )}
             </div>
           </div>
 
-          {/* Submit Button */}
           <Button type="submit" className="w-full">
             Create Account
           </Button>
         </form>
 
-        {/* Already have an account? */}
         <div className="flex justify-center items-center mt-6 space-x-2 text-sm">
           <p>Already have an account?</p>
           <Button

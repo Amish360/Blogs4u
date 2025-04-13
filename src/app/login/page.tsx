@@ -1,40 +1,41 @@
 "use client";
-import React from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import { LockIcon, MailIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
+// Types
+type LoginFormData = {
+  email: string;
+  password: string;
+};
+
+type LoginFormError = Partial<Record<keyof LoginFormData, string>>;
+
 const Login = () => {
   const router = useRouter();
 
-  const [formData, setFormData] = React.useState({
-    email: "",
-    password: "",
-  });
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+  const [error, setError] = useState<LoginFormError>({});
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    if (id === "email") setEmail(value);
+    if (id === "password") setPassword(value);
   };
 
-  const [error, setError] = React.useState<
-    Partial<Record<keyof typeof formData, string>>
-  >({});
-
-  const validate = () => {
-    const validationErrors: Partial<Record<keyof typeof formData, string>> = {};
-    if (!formData.email.trim()) {
-      validationErrors.email = "Email is required";
-    }
-    if (!formData.password.trim()) {
-      validationErrors.password = "Password is required";
-    }
-
+  const validate = (): LoginFormError => {
+    const validationErrors: LoginFormError = {};
+    if (!email.trim()) validationErrors.email = "Email is required";
+    if (!password.trim()) validationErrors.password = "Password is required";
     return validationErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -43,9 +44,10 @@ const Login = () => {
     }
 
     setError({});
-    console.log("Form submitted successfully", formData);
-    // Proceed with actual signup logic here
+    console.log("Form submitted successfully", { email, password });
+    // Proceed with actual login logic here
   };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-sm md:max-w-md bg-white rounded-2xl shadow-md p-8 border border-gray-300">
@@ -60,7 +62,7 @@ const Login = () => {
                 id="email"
                 className="peer pe-10"
                 placeholder="Email"
-                value={formData.email}
+                value={email}
                 onChange={handleChange}
                 type="email"
               />
@@ -81,7 +83,7 @@ const Login = () => {
                 id="password"
                 className="peer pe-10"
                 placeholder="Password"
-                value={formData.password}
+                value={password}
                 onChange={handleChange}
                 type="password"
               />
