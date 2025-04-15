@@ -9,7 +9,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 mt-10">
-      <div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-12">
+      <div className=" mx-auto px-4 py-8 sm:py-12">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex">
             <Image src="/Blogs4u.png" alt="Logo" width={100} height={100} />
