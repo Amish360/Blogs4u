@@ -45,7 +45,7 @@ const NavLeft = ({
         <FiMenu />
       </motion.button>
       <Logo />
-      <NavLink text="My Blogs" />
+      <NavLink text="MyBlogs" />
       <NavLink text="Community" />
       <NavLink text="Support" />
       <NavLink text="FAQ" />
