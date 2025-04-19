@@ -12,7 +12,8 @@ interface Blog {
   content: string;
   category: string;
   createdAt: string;
-  image?: string; // 👈 Optional image field
+  image?: string;
+  authorId: number; // Added authorId
 }
 
 const BlogDetail = () => {
@@ -28,6 +29,8 @@ const BlogDetail = () => {
     category: "",
   });
 
+  const currentUser = { id: 1 }; // Example: logged-in user ID
+
   useEffect(() => {
     const fetchBlog = async () => {
       const dummyBlogs: Blog[] = [
@@ -39,6 +42,7 @@ const BlogDetail = () => {
           category: "Sports",
           createdAt: "2025-04-01",
           image: "https://source.unsplash.com/800x400/?sports",
+          authorId: 1, // Example authorId
         },
         {
           id: 2,
@@ -48,6 +52,7 @@ const BlogDetail = () => {
           category: "Gaming",
           createdAt: "2025-03-28",
           image: "https://source.unsplash.com/800x400/?gaming",
+          authorId: 2, // Example authorId
         },
         {
           id: 3,
@@ -57,6 +62,7 @@ const BlogDetail = () => {
           category: "Gaming",
           createdAt: "2025-04-10",
           image: "https://source.unsplash.com/800x400/?video-games",
+          authorId: 3, // Example authorId
         },
       ];
 
@@ -106,6 +112,7 @@ const BlogDetail = () => {
       router.push("/MyBlogs");
     }
   };
+
   return (
     <div className="bg-gray-50 px-4 py-8 sm:px-8">
       <div className="mx-auto bg-white shadow-md rounded-2xl border border-gray-200 overflow-hidden">
@@ -113,7 +120,7 @@ const BlogDetail = () => {
         {blog?.image && (
           <div className="w-full h-48  bg-gray-200 rounded-lg overflow-hidden">
             <Image
-              src={`https://source.unsplash.com/600x400/?${blog.category}`}
+              src={blog.image}
               alt={blog.title}
               className="w-full h-full object-cover"
               height={100}
@@ -142,7 +149,7 @@ const BlogDetail = () => {
               </p>
             </div>
 
-            {blog?.id && (
+            {blog?.authorId === currentUser.id && ( // Only show if the currentUser is the author
               <div className="flex gap-2">
                 <Button
                   size="icon"
@@ -187,11 +194,7 @@ const BlogDetail = () => {
               </div>
             </>
           ) : (
-            <>
-              <p className="text-gray-700 whitespace-pre-wrap">
-                {blog?.content}
-              </p>
-            </>
+            <p className="text-gray-700 whitespace-pre-wrap">{blog?.content}</p>
           )}
         </div>
       </div>
