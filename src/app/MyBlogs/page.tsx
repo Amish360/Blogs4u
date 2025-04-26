@@ -78,7 +78,6 @@ const MyBlogs = () => {
     );
     if (confirmDelete) {
       setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== id));
-      console.log("Deleted blog with id:", id);
     }
   };
 

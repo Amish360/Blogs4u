@@ -44,7 +44,7 @@ const Login = () => {
     }
 
     setError({});
-    console.log("Form submitted successfully", { email, password });
+
     // Proceed with actual login logic here
   };
 

@@ -10,8 +10,9 @@ const hiddenPaths = [
   "/FAQ",
   "/Support",
   "/MyAccount",
-  "/Login",
+  "/login",
   "/Signup",
+  "/MyAccount/EditProfile",
 ];
 
 export const BackButton = () => {
