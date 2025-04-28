@@ -65,6 +65,7 @@ const Signup = () => {
       password,
       confirmPassword,
     };
+    console.log("Form Submitted:", formData);
 
     // Handle signup logic
   };
