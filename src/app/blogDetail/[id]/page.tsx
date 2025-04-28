@@ -90,6 +90,7 @@ const BlogDetail = () => {
   const handleSave = () => {
     setBlog((prev) => (prev ? { ...prev, ...form } : null));
     setIsEditing(false);
+    console.log("Saved:", form);
   };
 
   if (loading || !id) {
@@ -105,6 +106,8 @@ const BlogDetail = () => {
       "Are you sure you want to delete this blog?"
     );
     if (confirmDelete) {
+      console.log("Deleted blog with id:", id);
+
       // ✅ Redirect after deletion
       router.push("/MyBlogs");
     }
