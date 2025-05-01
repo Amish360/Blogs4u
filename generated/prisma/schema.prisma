@@ -12,22 +12,31 @@ model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
-  password  String // store hashed password
-  avatarUrl String? // profile picture (optional)
-  bio       String? // optional short bio
-  blogs     Blog[] // relation: user can have many blogs
+  password  String
+  avatarUrl String?
+  bio       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  blogs     Blog[]
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  blogs Blog[]
 }
 
 model Blog {
   id         Int      @id @default(autoincrement())
   title      String
-  content    String // no @db.LongText needed for Postgres
-  coverImage String? // optional
+  content    String
+  coverImage String?
   published  Boolean  @default(false)
   userId     Int
-  user       User     @relation(fields: [userId], references: [id])
+  categoryId Int // 👈 foreign key
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
 }
