@@ -17,3 +17,11 @@ export function verifyToken(token: string): JwtPayload | null {
     return null;
   }
 }
+
+export function getTokenData(token: string) {
+  try {
+    return verify(token, process.env.JWT_SECRET!);
+  } catch {
+    return null;
+  }
+}

@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing Credentials" }, { status: 400 });
   }
 
-  const user = await prisma.user.findUnique({ where: email });
+  const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
     return NextResponse.json({ error: "Invalid Credentials" }, { status: 401 });
@@ -20,5 +20,14 @@ export async function POST(req: Request) {
 
   const token = signToken({ id: user.id, email: user.email });
 
-  return NextResponse.json({ message: "Login Successful", token });
+  const response = NextResponse.json({ message: "Login successful" });
+
+  response.cookies.set("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+  });
+
+  return response;
 }
