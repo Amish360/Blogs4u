@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { verifyToken } from "@/lib/jwt";
+import { JWTPayload } from "jose";
+
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   const token = req.headers.get("authorization")?.replace("Bearer ", "");
-  const user = verifyToken(token || "");
 
-  if (!user) {
+  // Verify the token and assert the type as JWTPayload
+  const user = (await verifyToken(token || "")) as JWTPayload | null;
+
+  // Check if user is null or if user.id is undefined
+  if (!user || typeof user.id !== 'number') {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -21,13 +26,12 @@ export async function POST(req: Request) {
       categoryId,
       coverImage,
       published,
-      userId: user.id,
+      userId: user.id,  // Now safely assigning the user.id as a number
     },
   });
 
   return NextResponse.json(blog);
 }
-
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const categoryId = parseInt(searchParams.get("categoryID") || "0");

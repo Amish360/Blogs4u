@@ -16,7 +16,7 @@ export async function PATCH(req:Request){
         return NextResponse.json({error:"Unauthorized"},{status:401});
     }
 
-    const userData = getTokenData(token) as TokenPayload | null;
+    const userData = await getTokenData(token) as TokenPayload | null;
     if(!userData?.id){
         return NextResponse.json({error:"Unauthorized"},{status:401})
     }
