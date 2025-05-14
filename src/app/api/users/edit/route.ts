@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getTokenData } from "@/lib/jwt";
+import { headers } from "next/headers";
 
 const prisma = new PrismaClient();
 
@@ -9,29 +10,31 @@ interface TokenPayload {
     email: string;
   }
 
-export async function PATCH(req:Request){
-    const token = req.headers.get("authorization")?.split(" ")[1];
+export async function PATCH(req: Request) {
+  const headerList = await headers();
+  const authHeader = headerList.get("authorization");
 
-    if(!token){
-        return NextResponse.json({error:"Unauthorized"},{status:401});
-    }
+  const token = authHeader?.split(" ")[1];
 
-    const userData = await getTokenData(token) as TokenPayload | null;
-    if(!userData?.id){
-        return NextResponse.json({error:"Unauthorized"},{status:401})
-    }
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized, No token" }, { status: 401 });
+  }
 
-    const {name,avatarUrl,bio}= await req.json();
+  const userData = await getTokenData(token) as TokenPayload | null;
+  if (!userData?.id) {
+    return NextResponse.json({ error: "Unauthorized, Invalid Token" }, { status: 401 });
+  }
 
-    const updatedUser = await prisma.user.update({
-        where: { id: userData.id },
-        data: {
-          name,
-          avatarUrl,
-          bio,
-        },
-      });
-      
+  const { name, avatarUrl, bio } = await req.json();
 
-    return NextResponse.json({ message: "Profile updated", user: updatedUser });
+  const updatedUser = await prisma.user.update({
+    where: { id: userData.id },
+    data: {
+      name,
+      avatarUrl,
+      bio,
+    },
+  });
+
+  return NextResponse.json({ message: "Profile updated", user: updatedUser });
 }
