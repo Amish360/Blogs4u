@@ -8,17 +8,27 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   const token = req.headers.get("authorization")?.replace("Bearer ", "");
 
-  // Verify the token and assert the type as JWTPayload
   const user = (await verifyToken(token || "")) as JWTPayload | null;
 
-  // Check if user is null or if user.id is undefined
-  if (!user || typeof user.id !== 'number') {
+  if (!user || typeof user.id !== "number") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await req.json();
   const { title, content, categoryId, coverImage, published } = body;
 
+  const category = await prisma.category.findUnique({
+    where: { id: categoryId },
+  });
+
+  if (!category) {
+    return NextResponse.json(
+      { error: "Invalid category ID: Category does not exist" },
+      { status: 400 }
+    );
+  }
+
+ 
   const blog = await prisma.blog.create({
     data: {
       title,
@@ -26,7 +36,7 @@ export async function POST(req: Request) {
       categoryId,
       coverImage,
       published,
-      userId: user.id,  // Now safely assigning the user.id as a number
+      userId: user.id,
     },
   });
 
@@ -58,6 +68,14 @@ export async function PUT(req: Request) {
   const body = await req.json();
   const { id, title, content, coverImage, published, categoryId } = body;
 
+  const existingBlog = await prisma.blog.findUnique({
+    where: { id: parseInt(id) },
+  });
+
+  if (!existingBlog) {
+    return NextResponse.json({ error: "Blog not found" }, { status: 404 });
+  }
+
   const updated = await prisma.blog.update({
     where: { id: parseInt(id) },
     data: {
@@ -72,6 +90,7 @@ export async function PUT(req: Request) {
   return NextResponse.json(updated);
 }
 
+
 export async function DELETE(req: Request) {
   const body = await req.json();
   const { id } = body;
@@ -80,11 +99,26 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Blog ID is required" }, { status: 400 });
   }
 
-  await prisma.blog.delete({
-    where: {
-      id: parseInt(id),
-    },
-  });
+  try {
+    const deletedBlog = await prisma.blog.delete({
+      where: { id: parseInt(id) },
+    });
 
-  return NextResponse.json({ message: "Deleted" });
+    
+    return NextResponse.json({ message: "Blog deleted successfully", deletedBlog});
+  } catch (error: unknown) {
+  
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: "Failed to delete the blog", details: error.message },
+        { status: 500 }
+      );
+    }
+
+  
+    return NextResponse.json(
+      { error: "An unknown error occurred" },
+      { status: 500 }
+    );
+  }
 }

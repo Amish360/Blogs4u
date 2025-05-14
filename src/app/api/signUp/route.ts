@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing Fields" }, { status: 400 });
   }
 
-  const existingUser = await prisma.user.findUnique({ where: email });
+  const existingUser = await prisma.user.findUnique({ where: { email } });
 
   if (existingUser) {
     return NextResponse.json({ error: "User already exists" }, { status: 400 });
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     },
   });
 
-  const token = signToken({ id: user.id, email: user.email });
+  const token = await signToken({ id: user.id, email: user.email });
 
   return NextResponse.json(
     { message: "Signup Successful", token },
