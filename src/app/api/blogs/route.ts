@@ -28,7 +28,6 @@ export async function POST(req: Request) {
     );
   }
 
- 
   const blog = await prisma.blog.create({
     data: {
       title,
@@ -90,7 +89,6 @@ export async function PUT(req: Request) {
   return NextResponse.json(updated);
 }
 
-
 export async function DELETE(req: Request) {
   const body = await req.json();
   const { id } = body;
@@ -104,10 +102,11 @@ export async function DELETE(req: Request) {
       where: { id: parseInt(id) },
     });
 
-    
-    return NextResponse.json({ message: "Blog deleted successfully", deletedBlog});
+    return NextResponse.json({
+      message: "Blog deleted successfully",
+      deletedBlog,
+    });
   } catch (error: unknown) {
-  
     if (error instanceof Error) {
       return NextResponse.json(
         { error: "Failed to delete the blog", details: error.message },
@@ -115,7 +114,6 @@ export async function DELETE(req: Request) {
       );
     }
 
-  
     return NextResponse.json(
       { error: "An unknown error occurred" },
       { status: 500 }

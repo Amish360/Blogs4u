@@ -6,9 +6,9 @@ import { headers } from "next/headers";
 const prisma = new PrismaClient();
 
 interface TokenPayload {
-    id: number;
-    email: string;
-  }
+  id: number;
+  email: string;
+}
 
 export async function PATCH(req: Request) {
   const headerList = await headers();
@@ -17,12 +17,18 @@ export async function PATCH(req: Request) {
   const token = authHeader?.split(" ")[1];
 
   if (!token) {
-    return NextResponse.json({ error: "Unauthorized, No token" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized, No token" },
+      { status: 401 }
+    );
   }
 
-  const userData = await getTokenData(token) as TokenPayload | null;
+  const userData = (await getTokenData(token)) as TokenPayload | null;
   if (!userData?.id) {
-    return NextResponse.json({ error: "Unauthorized, Invalid Token" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized, Invalid Token" },
+      { status: 401 }
+    );
   }
 
   const { name, avatarUrl, bio } = await req.json();
