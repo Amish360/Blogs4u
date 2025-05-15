@@ -1,10 +1,13 @@
 "use client";
-import React, { useState, FormEvent } from "react";
-import { LocateIcon, LockIcon, MailIcon, User } from "lucide-react";
+import React, { useState, FormEvent, useEffect } from "react";
+import { LockIcon, MailIcon, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/src/redux/store";
+import { signupUser } from "@/src/redux/slices/authSlice";
 
 type FormFields = {
   firstName: string;
@@ -24,11 +27,15 @@ const Signup = () => {
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
 
   const [errors, setErrors] = useState<FormErrors>({});
+  const {
+    isAuthenticated,
+    loading,
+    error: signupError,
+  } = useSelector((state: RootState) => state.auth);
 
   const validate = (): FormErrors => {
     const newErrors: FormErrors = {};
@@ -37,7 +44,6 @@ const Signup = () => {
     if (!lastName.trim()) newErrors.lastName = "Last Name is required";
     if (!email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid";
-    if (!address.trim()) newErrors.address = "Address is required";
     if (!password.trim()) newErrors.password = "Password is required";
     if (!confirmPassword.trim())
       newErrors.confirmPassword = "Confirm Password is required";
@@ -47,6 +53,7 @@ const Signup = () => {
     return newErrors;
   };
 
+  const dispatch = useDispatch<AppDispatch>();
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -57,18 +64,23 @@ const Signup = () => {
     }
 
     setErrors({});
-    const formData: FormFields = {
-      firstName,
-      lastName,
-      email,
-      address,
-      password,
-      confirmPassword,
-    };
-    console.log("Form Submitted:", formData);
 
-    // Handle signup logic
+    const name = `${firstName} ${lastName}`;
+
+    dispatch(
+      signupUser({
+        name,
+        email,
+        password,
+      })
+    );
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/home");
+    }
+  }, [isAuthenticated, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -138,25 +150,6 @@ const Signup = () => {
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
             </div>
-
-            <div className="w-full">
-              <Label htmlFor="address">Address</Label>
-              <div className="relative mt-1">
-                <Input
-                  id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Address"
-                  className="peer pe-10"
-                />
-                <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
-                  <LocateIcon size={16} />
-                </div>
-              </div>
-              {errors.address && (
-                <p className="text-red-500 text-sm mt-1">{errors.address}</p>
-              )}
-            </div>
           </div>
 
           {/* Passwords */}
@@ -204,10 +197,14 @@ const Signup = () => {
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
-            Create Account
+          <Button type="submit" className="w-full mt-4" disabled={loading}>
+            {loading ? "Creating..." : "Create Account"}
           </Button>
         </form>
+
+        {signupError && (
+          <p className="text-red-500 text-sm text-center mt-2">{signupError}</p>
+        )}
 
         <div className="flex justify-center items-center mt-6 space-x-2 text-sm">
           <p>Already have an account?</p>

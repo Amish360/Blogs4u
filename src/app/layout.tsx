@@ -4,6 +4,7 @@ import FlipNavWrapper from "@/components/navbar";
 import { BackButton } from "@/components/backButton";
 import Footer from "@/components/footer";
 import "./globals.css";
+import { ReduxProvider } from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,7 @@ export default function RootLayout({
       >
         <FlipNavWrapper />
         <BackButton />
-        {children}
+        <ReduxProvider>{children}</ReduxProvider>
         <Footer />
       </body>
     </html>

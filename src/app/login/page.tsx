@@ -1,10 +1,13 @@
 "use client";
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { LockIcon, MailIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/src/redux/store";
+import { loginUser } from "@/src/redux/slices/authSlice";
 
 // Types
 type LoginFormData = {
@@ -16,11 +19,17 @@ type LoginFormError = Partial<Record<keyof LoginFormData, string>>;
 
 const Login = () => {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-
   const [error, setError] = useState<LoginFormError>({});
+
+  const {
+    loading,
+    error: loginError,
+    isAuthenticated,
+  } = useSelector((state: RootState) => state.auth);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -44,9 +53,14 @@ const Login = () => {
     }
 
     setError({});
-
-    // Proceed with actual login logic here
+    dispatch(loginUser({ email, password }));
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/home");
+    }
+  }, [isAuthenticated, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -97,10 +111,15 @@ const Login = () => {
           </div>
 
           {/* Login Button */}
-          <Button type="submit" className="w-full mt-4">
-            Login
+          <Button type="submit" className="w-full mt-4" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
+
+        {/* Login Error (from Redux) */}
+        {loginError && (
+          <p className="text-red-500 text-sm mt-4 text-center">{loginError}</p>
+        )}
 
         {/* Sign Up Redirect */}
         <div className="flex justify-center items-center mt-6 space-x-2 text-sm">

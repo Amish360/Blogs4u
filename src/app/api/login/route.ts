@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
   const token = await signToken({ id: user.id, email: user.email });
 
-  const response = NextResponse.json({ message: "Login successful", token});
+  const response = NextResponse.json({ message: "Login successful", token });
 
   response.cookies.set("token", token, {
     httpOnly: true,
