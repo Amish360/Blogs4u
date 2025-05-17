@@ -1,28 +1,54 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/src/redux/store";
+import {
+  clearEditSuccess,
+  editProfile,
+  getProfile,
+} from "@/src/redux/slices/authSlice";
 
 const EditProfile = () => {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { user, editSuccess, loading } = useSelector(
+    (state: RootState) => state.auth
+  );
 
   const [form, setForm] = useState({
-    name: "Amish360",
-    email: "amish360@example.com",
-    avatarUrl: "https://source.unsplash.com/100x100/?portrait",
+    name: "",
+    email: "",
+    avatarUrl: "",
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>(form.avatarUrl);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const [errors, setErrors] = useState<{
     name?: string;
     email?: string;
     image?: string;
   }>({});
+
+  // Load profile on mount
+  useEffect(() => {
+    if (!user) {
+      dispatch(getProfile(1)); // Replace `"me"` with actual userId if needed
+    } else {
+      setForm({
+        name: user.name || "",
+        email: user.email || "",
+        avatarUrl: user.avatarUrl || "",
+      });
+      setPreviewUrl(user.avatarUrl || "");
+    }
+  }, [user, dispatch]);
 
   const validateForm = () => {
     const newErrors: { name?: string; email?: string; image?: string } = {};
@@ -39,15 +65,14 @@ const EditProfile = () => {
       newErrors.email = "Email is invalid.";
     }
 
-    if (!selectedFile) {
-      newErrors.image = "Please upload an image.";
-    } else if (
-      !["image/jpeg", "image/png", "image/gif"].includes(selectedFile.type)
-    ) {
-      newErrors.image = "Only JPEG, PNG, and GIF images are allowed.";
-    } else if (selectedFile.size > 5 * 1024 * 1024) {
-      // 5MB limit
-      newErrors.image = "Image size must be less than 5MB.";
+    if (selectedFile) {
+      if (
+        !["image/jpeg", "image/png", "image/gif"].includes(selectedFile.type)
+      ) {
+        newErrors.image = "Only JPEG, PNG, and GIF images are allowed.";
+      } else if (selectedFile.size > 5 * 1024 * 1024) {
+        newErrors.image = "Image size must be less than 5MB.";
+      }
     }
 
     setErrors(newErrors);
@@ -57,7 +82,7 @@ const EditProfile = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors((prev) => ({ ...prev, [e.target.name]: undefined })); // clear error on change
+    setErrors((prev) => ({ ...prev, [e.target.name]: undefined }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +91,7 @@ const EditProfile = () => {
       setSelectedFile(file);
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
-      setErrors((prev) => ({ ...prev, image: undefined })); // clear image error
+      setErrors((prev) => ({ ...prev, image: undefined }));
     }
   };
 
@@ -75,8 +100,19 @@ const EditProfile = () => {
 
     if (!validateForm()) return;
 
-    router.push("/MyAccount");
+    const bio = user?.bio || "User bio here";
+
+    const avatarUrl = previewUrl;
+
+    dispatch(editProfile({ name: form.name, avatarUrl, bio }));
   };
+
+  useEffect(() => {
+    if (editSuccess) {
+      router.push("/MyAccount");
+      dispatch(clearEditSuccess());
+    }
+  }, [editSuccess, router, dispatch]);
 
   return (
     <div className="max-w-2xl mx-auto py-12 px-6">
@@ -141,6 +177,7 @@ const EditProfile = () => {
               type="email"
               value={form.email}
               onChange={handleChange}
+              disabled // Usually we don’t allow changing email directly
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -156,7 +193,9 @@ const EditProfile = () => {
             >
               Cancel
             </Button>
-            <Button type="submit">Save Changes</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
         </form>
       </div>
