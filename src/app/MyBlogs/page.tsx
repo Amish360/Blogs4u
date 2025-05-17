@@ -1,96 +1,37 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Trash2Icon } from "lucide-react";
-
-interface Blog {
-  id: number;
-  title: string;
-  excerpt: string;
-  category: string;
-  createdAt: string;
-}
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/src/redux/store";
+import { fetchMyBlogs } from "@/src/redux/slices/blogSlice";
 
 const MyBlogs = () => {
   const router = useRouter();
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const blogsPerPage = 4;
+  const dispatch = useDispatch<AppDispatch>();
+  const { blogs, loading, error } = useSelector(
+    (state: RootState) => state.blog
+  );
+  const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
-    const fetchBlogs = async () => {
-      setTimeout(() => {
-        const dummyBlogs: Blog[] = [
-          {
-            id: 1,
-            title: "Top 10 Underrated Sports Moments",
-            excerpt:
-              "A look at the most underrated moments in sports history...",
-            category: "Sports",
-            createdAt: "2025-04-01",
-          },
-          {
-            id: 2,
-            title: "Why RPG Games Are Still King",
-            excerpt: "Exploring the legacy of RPGs in the gaming world...",
-            category: "Gaming",
-            createdAt: "2025-03-28",
-          },
-          {
-            id: 3,
-            title: "The Future of E-Sports",
-            excerpt: "What does the future hold for competitive gaming?",
-            category: "Gaming",
-            createdAt: "2025-04-10",
-          },
-          {
-            id: 4,
-            title: "How Sports Shape Our Lives",
-            excerpt:
-              "Sports and their impact on society and character building.",
-            category: "Sports",
-            createdAt: "2025-03-15",
-          },
-          {
-            id: 5,
-            title: "Hidden Indie Gems",
-            excerpt: "Underrated indie games you should be playing right now.",
-            category: "Gaming",
-            createdAt: "2025-02-20",
-          },
-        ];
+    if (user?.id) {
+      dispatch(fetchMyBlogs(user.id));
+    }
+  }, [user, dispatch]);
 
-        setBlogs(dummyBlogs); // Replace with fetch later
-        setLoading(false);
-      }, 1500);
-    };
+  if (loading) return <p>Loading blogs...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
 
-    fetchBlogs();
-  }, []);
-
-  const handleDelete = (id: number) => {
+  const handleDelete = () => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this blog?"
     );
     if (confirmDelete) {
-      setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== id));
+      // setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== id));
     }
   };
-
-  // Pagination logic
-  const indexOfLastBlog = currentPage * blogsPerPage;
-  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
-  const currentBlogs = blogs.slice(indexOfFirstBlog, indexOfLastBlog);
-  const totalPages = Math.ceil(blogs.length / blogsPerPage);
-
-  const goToNextPage = () =>
-    setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
-  const goToPrevPage = () =>
-    setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
 
   return (
     <div className="bg-gray-100 py-10 px-4 sm:px-8">
@@ -116,14 +57,14 @@ const MyBlogs = () => {
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {currentBlogs.map((blog) => (
+              {blogs.map((blog) => (
                 <div
                   key={blog.id}
                   className="relative bg-white rounded-xl shadow-md p-6 border border-gray-200 transition hover:shadow-lg flex flex-col justify-between"
                 >
                   {/* 🗑️ Delete Button */}
                   <button
-                    onClick={() => handleDelete(blog.id)}
+                    onClick={() => handleDelete()}
                     className="absolute top-2 right-2 text-white hover:text-red-700 bg-red-500 p-2 rounded-3xl"
                     title="Delete Blog"
                   >
@@ -147,14 +88,18 @@ const MyBlogs = () => {
                       {blog.title}
                     </h2>
                     <span className="text-sm text-white bg-black rounded-md px-4 py-2 my-2">
-                      {blog.category}
+                      {blog.category?.name}
                     </span>
                   </div>
 
                   {/* 📖 Excerpt & Date */}
-                  <p className="text-gray-700 mb-2">{blog.excerpt}</p>
+                  <p className="text-gray-700 mb-2">
+                    <p className="text-gray-700 mb-2">
+                      {blog.content.slice(0, 100)}...
+                    </p>
+                  </p>
                   <p className="text-sm text-gray-400 mb-4">
-                    Published on {blog.createdAt}
+                    Published on {new Date(blog.createdAt).toLocaleDateString()}
                   </p>
 
                   {/* 🔗 View Details Button */}
@@ -166,27 +111,6 @@ const MyBlogs = () => {
                   </button>
                 </div>
               ))}
-            </div>
-
-            {/* Pagination controls */}
-            <div className="flex justify-center items-center mt-8 gap-4">
-              <button
-                onClick={goToPrevPage}
-                disabled={currentPage === 1}
-                className="px-4 py-2 bg-black text-white rounded-md disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="text-sm text-gray-600">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={goToNextPage}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-black text-white rounded-md disabled:opacity-50"
-              >
-                Next
-              </button>
             </div>
           </>
         )}
