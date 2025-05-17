@@ -5,6 +5,23 @@ interface AuthState {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    avatarUrl: string;
+    bio?: string;
+  } | null;
+  editSuccess: boolean;
+}
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  avatarUrl: string;
+  bio?: string;
+  blogCount?: number;
 }
 
 const initialState: AuthState = {
@@ -12,6 +29,8 @@ const initialState: AuthState = {
   isAuthenticated: false,
   loading: false,
   error: null,
+  user: null,
+  editSuccess: false,
 };
 
 export const signupUser = createAsyncThunk<
@@ -66,6 +85,61 @@ export const loginUser = createAsyncThunk<
   }
 });
 
+export const editProfile = createAsyncThunk<
+  { message: string; user: User },
+  { name: string; avatarUrl: string; bio: string },
+  { state: { auth: AuthState }; rejectValue: string }
+>(
+  "auth/editProfile",
+  async ({ name, avatarUrl, bio }, { getState, rejectWithValue }) => {
+    const token = getState().auth.token;
+
+    if (!token) {
+      return rejectWithValue("Unauthorized: No token found.");
+    }
+
+    try {
+      const res = await fetch("/api/edit-profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name, avatarUrl, bio }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return rejectWithValue(data.error || "Failed to update profile.");
+      }
+
+      return { message: data.message, user: data.user as User };
+    } catch {
+      return rejectWithValue("Network error or server is unavailable.");
+    }
+  }
+);
+
+export const getProfile = createAsyncThunk<
+  User, // ✅ Replace `any` with `User`
+  number,
+  { rejectValue: string }
+>("auth/getProfile", async (userId, { rejectWithValue }) => {
+  try {
+    const res = await fetch(`/api/profile?userId=${userId}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      return rejectWithValue(data.error || "Failed to fetch profile");
+    }
+
+    return data.user as User;
+  } catch {
+    return rejectWithValue("Network error or server is unavailable.");
+  }
+});
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -75,6 +149,9 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.loading = false;
       state.error = null;
+    },
+    clearEditSuccess: (state) => {
+      state.editSuccess = false;
     },
   },
   extraReducers: (builder) => {
@@ -112,9 +189,47 @@ const authSlice = createSlice({
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = true;
         state.error = action.payload || "Login Failed";
+      })
+      //Edit Profile add cases
+      .addCase(editProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.editSuccess = true;
+      })
+      .addCase(
+        editProfile.fulfilled,
+        (state, action: PayloadAction<{ message: string; user: User }>) => {
+          state.loading = false;
+          if (state.user) {
+            state.user.name = action.payload.user.name;
+            state.user.avatarUrl = action.payload.user.avatarUrl;
+            state.user.bio = action.payload.user.bio;
+          } else {
+            state.user = action.payload.user;
+          }
+        }
+      )
+      .addCase(editProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.editSuccess = false;
+        state.error = action.payload || "Failed to update user profile";
+      })
+      // Get User addCases
+      .addCase(getProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getProfile.fulfilled, (state, action: PayloadAction<User>) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.isAuthenticated = true;
+      })
+      .addCase(getProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to load user profile";
       });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, clearEditSuccess } = authSlice.actions;
 export default authSlice.reducer;
