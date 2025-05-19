@@ -1,79 +1,52 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams } from "next/navigation";
 import { BlogsGrid, BentoGridItem } from "@/components/blogsGrid"; // Update the import path if needed
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/src/redux/store";
+import { fetchCommunityBlogs } from "@/src/redux/slices/communityBlogsSlice";
 
-// Simulated dummy blogs for communities
-const dummyBlogs = {
-  tech: [
-    {
-      id: 1,
-      title: "React vs Vue",
-      excerpt: "Which one to choose...",
-      image: "/images/react-vs-vue.jpg",
-    },
-    {
-      id: 2,
-      title: "AI and the Future",
-      excerpt: "Discussing AI trends...",
-      image: "/images/ai-future.jpg",
-    },
-  ],
-  gaming: [
-    {
-      id: 1,
-      title: "Best RPGs 2025",
-      excerpt: "Top role-playing games...",
-      image: "/images/rpg-2025.jpg",
-    },
-    {
-      id: 2,
-      title: "Esports Rising",
-      excerpt: "The growth of competitive gaming...",
-      image: "/images/esports.jpg",
-    },
-  ],
+const categoryMap: Record<string, number> = {
+  tech: 1,
+  gaming: 2,
+  sports: 3,
 };
 
 const CommunityPage = () => {
   const params = useParams();
-  const [loading, setLoading] = useState(true);
-  const [slug, setSlug] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
+  const slug = params?.slug as string;
+  const { blogs, loading, error } = useSelector(
+    (state: RootState) => state.communityBlogs
+  );
+
   useEffect(() => {
-    if (params?.slug) {
-      setSlug(params.slug as string);
-      setLoading(false);
+    const categoryId = categoryMap[slug];
+    if (categoryId) {
+      dispatch(fetchCommunityBlogs({ categoryID: categoryId }));
     }
-  }, [params]);
-
-  if (loading || !slug) {
-    return (
-      <div className="p-8 text-center text-xl font-medium text-gray-600">
-        Loading community...
-      </div>
-    );
-  }
-
-  const blogs = dummyBlogs[slug as keyof typeof dummyBlogs] || [];
+  }, [slug, dispatch]);
 
   return (
     <div className="p-8">
       <h1 className="text-4xl font-bold capitalize mb-6">{slug} Community</h1>
-      {blogs.length === 0 ? (
-        <p className="text-gray-600 text-lg">
-          No blogs available in this community yet.
-        </p>
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="text-red-500">{error}</p>
+      ) : blogs.length === 0 ? (
+        <p>No blogs found in this community</p>
       ) : (
         <BlogsGrid>
-          {blogs.map((blog, index) => (
+          {blogs.map((blog) => (
             <BentoGridItem
-              key={index}
+              key={blog.id}
               title={blog.title}
-              description={blog.excerpt}
-              image={blog.image} // 👈 pass image prop
+              description={blog.content.slice(0, 100) + "..."}
+              image={blog.coverImage || "/default.jpg"}
               onClick={() => router.push(`/blogDetail/${blog.id}`)}
             />
           ))}
