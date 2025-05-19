@@ -1,38 +1,45 @@
 "use client";
 import React, { useEffect } from "react";
-import { useParams } from "next/navigation";
-import { BlogsGrid, BentoGridItem } from "@/components/blogsGrid"; // Update the import path if needed
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/src/redux/store";
+import { fetchCategories } from "@/src/redux/slices/categoriesSlice";
 import { fetchCommunityBlogs } from "@/src/redux/slices/communityBlogsSlice";
-
-const categoryMap: Record<string, number> = {
-  tech: 1,
-  gaming: 2,
-  sports: 3,
-};
+import { RootState, AppDispatch } from "@/src/redux/store";
+import { BlogsGrid, BentoGridItem } from "@/components/blogsGrid";
 
 const CommunityPage = () => {
-  const params = useParams();
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+  const params = useParams();
 
-  const slug = params?.slug as string;
+  const categoryID = parseInt(params.id as string); // 👈 get id from URL
+
+  const { list: categories } = useSelector(
+    (state: RootState) => state.categories
+  );
   const { blogs, loading, error } = useSelector(
     (state: RootState) => state.communityBlogs
   );
 
   useEffect(() => {
-    const categoryId = categoryMap[slug];
-    if (categoryId) {
-      dispatch(fetchCommunityBlogs({ categoryID: categoryId }));
+    if (categories.length === 0) {
+      dispatch(fetchCategories());
     }
-  }, [slug, dispatch]);
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (categoryID) {
+      dispatch(fetchCommunityBlogs({ categoryID }));
+    }
+  }, [categoryID, dispatch]);
+
+  const category = categories.find((cat) => cat.id === categoryID);
 
   return (
     <div className="p-8">
-      <h1 className="text-4xl font-bold capitalize mb-6">{slug} Community</h1>
+      <h1 className="text-4xl font-bold capitalize mb-6">
+        {category?.name || "Community"}
+      </h1>
       {loading ? (
         <p>Loading...</p>
       ) : error ? (
