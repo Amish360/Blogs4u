@@ -47,6 +47,54 @@ export const fetchMyBlogs = createAsyncThunk(
   }
 );
 
+export const createBlog = createAsyncThunk(
+  "blogs/createBlog",
+  async (
+    {
+      title,
+      content,
+      categoryId,
+      coverImage,
+      published,
+      token,
+    }: {
+      title: string;
+      content: string;
+      categoryId: number;
+      coverImage?: string;
+      published: boolean;
+      token: string;
+    },
+    thunkAPI
+  ) => {
+    try {
+      const res = await fetch("/api/blogs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title,
+          content,
+          categoryId,
+          coverImage,
+          published,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        return thunkAPI.rejectWithValue(error.error || "Failed to create blog");
+      }
+
+      return await res.json();
+    } catch {
+      return thunkAPI.rejectWithValue("Network error");
+    }
+  }
+);
+
 const blogsSlice = createSlice({
   name: "blogs",
   initialState,
@@ -62,6 +110,18 @@ const blogsSlice = createSlice({
         state.blogs = action.payload;
       })
       .addCase(fetchMyBlogs.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(createBlog.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createBlog.fulfilled, (state, action) => {
+        state.loading = false;
+        state.blogs.push(action.payload);
+      })
+      .addCase(createBlog.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
