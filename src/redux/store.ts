@@ -3,6 +3,7 @@ import authReducer from "./slices/authSlice";
 import blogsReducer from "./slices/blogSlice";
 import communityBlogsReducer from "./slices/communityBlogsSlice";
 import categoriesReducer from "./slices/categoriesSlice";
+import blogDetailReducer from "./slices/blogDetailSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     blog: blogsReducer,
     communityBlogs: communityBlogsReducer,
     categories: categoriesReducer,
+    blogDetail: blogDetailReducer,
   },
 });
 

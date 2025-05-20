@@ -25,7 +25,7 @@ const CommunityPage = () => {
     if (categories.length === 0) {
       dispatch(fetchCategories());
     }
-  }, [dispatch]);
+  }, [categories.length, dispatch]);
 
   useEffect(() => {
     if (categoryID) {

@@ -20,7 +20,7 @@ export default function CommunitySection() {
     if (categories.length === 0) {
       dispatch(fetchCategories());
     }
-  }, [dispatch]);
+  }, [categories.length, dispatch]);
 
   if (loading) {
     return <p className="text-center p-4">Loading communities...</p>;
