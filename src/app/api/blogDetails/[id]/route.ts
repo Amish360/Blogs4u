@@ -72,7 +72,7 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { title, content, categoryId } = body;
+    const { title, content, categoryId, coverImage } = body;
 
     const updatedBlog = await prisma.blog.update({
       where: { id: blogId },
@@ -80,6 +80,7 @@ export async function PUT(
         title,
         content,
         categoryId,
+        coverImage,
       },
     });
 
