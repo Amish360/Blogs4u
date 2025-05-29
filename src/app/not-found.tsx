@@ -1,34 +1,35 @@
-// app/not-found.tsx
 "use client";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 export default function NotFound() {
   const router = useRouter();
 
   useEffect(() => {
-    // Optionally, redirect to home after 5 seconds
     const timeout = setTimeout(() => {
-      router.push("/home");
+      router.push("/");
     }, 5000);
-
     return () => clearTimeout(timeout);
   }, [router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-      <h1 className="text-6xl font-bold mb-4 text-red-600">404</h1>
-      <p className="text-2xl mb-6">Oops! Page Not Found.</p>
-      <p className="mb-6 text-center max-w-md text-gray-600">
-        The page you are looking for does not exist or has been moved.
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white px-6">
+      <h1 className="text-[80px] font-extrabold text-[#111827] mb-2">404</h1>
+      <p className="text-xl text-[#374151] mb-4">Oops! Page Not Found.</p>
+      <p className="text-center text-[#6B7280] max-w-md mb-8">
+        The page you are looking for doesn’t exist or has been moved. You’ll be
+        redirected shortly.
       </p>
-      <button
-        className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-        onClick={() => router.push("/home")}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="px-6 py-2 bg-[#111827] text-white rounded-md hover:bg-[#1f2937] transition-colors duration-200"
+        onClick={() => router.push("/")}
       >
         Go to Home
-      </button>
+      </motion.button>
     </div>
   );
 }
