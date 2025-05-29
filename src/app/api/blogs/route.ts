@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { verifyToken } from "@/lib/jwt";
 import { JWTPayload } from "jose";
+import cloudinary from "@/lib/cloudinary";
 
 const prisma = new PrismaClient();
 
@@ -14,18 +15,37 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json();
-  const { title, content, categoryId, coverImage, published } = body;
+  const formData = await req.formData();
+  const title = formData.get("title") as string;
+  const content = formData.get("content") as string;
+  const categoryId = Number(formData.get("categoryId"));
+  const published = formData.get("published") === "true";
+  const image = formData.get("image") as File;
+
+  if (!image) {
+    return NextResponse.json({ error: "Invalid image" }, { status: 400 });
+  }
+
+  // Convert File to Buffer
+  const buffer = Buffer.from(await image.arrayBuffer());
+
+  // Convert to base64
+  const base64 = buffer.toString("base64");
+  const dataUri = `data:${image.type};base64,${base64}`;
+
+  // Upload to Cloudinary
+  const uploadResult = await cloudinary.uploader.upload(dataUri, {
+    folder: "blogs", // Optional: saves in a folder in Cloudinary
+  });
+
+  const imageUrl = uploadResult.secure_url;
 
   const category = await prisma.category.findUnique({
     where: { id: categoryId },
   });
 
   if (!category) {
-    return NextResponse.json(
-      { error: "Invalid category ID: Category does not exist" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid category ID" }, { status: 400 });
   }
 
   const blog = await prisma.blog.create({
@@ -33,9 +53,9 @@ export async function POST(req: Request) {
       title,
       content,
       categoryId,
-      coverImage,
       published,
       userId: user.id,
+      coverImage: imageUrl,
     },
   });
 

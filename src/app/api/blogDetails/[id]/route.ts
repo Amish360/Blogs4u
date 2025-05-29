@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import cloudinary from "@/lib/cloudinary";
 const prisma = new PrismaClient();
 
 export async function GET(
@@ -71,8 +72,27 @@ export async function PUT(
       return NextResponse.json({ error: "Invalid blog ID" }, { status: 400 });
     }
 
-    const body = await req.json();
-    const { title, content, categoryId, coverImage } = body;
+    const formData = await req.formData();
+
+    const title = formData.get("title") as string;
+    const content = formData.get("content") as string;
+    const categoryId = Number(formData.get("categoryId"));
+    const image = formData.get("image") as File | null;
+
+    let imageUrl: string | undefined;
+
+    // Only upload if a new image is provided
+    if (image && image instanceof File && image.type.startsWith("image/")) {
+      const buffer = Buffer.from(await image.arrayBuffer());
+      const base64 = buffer.toString("base64");
+      const dataUri = `data:${image.type};base64,${base64}`;
+
+      const uploadResult = await cloudinary.uploader.upload(dataUri, {
+        folder: "blogs",
+      });
+
+      imageUrl = uploadResult.secure_url;
+    }
 
     const updatedBlog = await prisma.blog.update({
       where: { id: blogId },
@@ -80,12 +100,13 @@ export async function PUT(
         title,
         content,
         categoryId,
-        coverImage,
+        ...(imageUrl && { coverImage: imageUrl }), // only update if image uploaded
       },
     });
 
     return NextResponse.json(updatedBlog);
-  } catch {
+  } catch (error) {
+    console.error("Update error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
