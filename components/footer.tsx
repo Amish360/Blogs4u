@@ -8,58 +8,66 @@ const Footer = () => {
   const router = useRouter();
 
   return (
-    <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 mt-10">
-      <div className=" mx-auto px-4 py-8 sm:py-12">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex">
-            <Image src="/Blogs4u.png" alt="Logo" width={100} height={100} />
-          </div>
-
-          <ul className="flex flex-wrap justify-center sm:justify-end gap-4 text-sm text-gray-600 dark:text-gray-400">
-            <li>
-              <button
-                onClick={() => router.push("/about")}
-                className="hover:underline"
-              >
-                About
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => router.push("/privacy-policy")}
-                className="hover:underline"
-              >
-                Privacy Policy
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => router.push("/licensing")}
-                className="hover:underline"
-              >
-                Licensing
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => router.push("/contact")}
-                className="hover:underline"
-              >
-                Contact
-              </button>
-            </li>
-          </ul>
+    <footer className="bg-white text-[#111827] border-t border-gray-200 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 mt-10">
+      <div className="max-w-5xl mx-auto px-6 py-10 flex flex-col items-center gap-6">
+        {/* Logo */}
+        <div>
+          <Image
+            src="/Blogs4u.png"
+            alt="Blog4U Logo"
+            width={100}
+            height={100}
+            className="object-contain"
+          />
         </div>
 
-        <hr className="my-6 border-gray-200 dark:border-gray-700" />
+        {/* Nav Links */}
+        <ul className="flex flex-wrap justify-center gap-6 text-sm font-medium">
+          <li>
+            <button
+              onClick={() => router.push("/about")}
+              className="hover:text-[#1f2937] transition-colors"
+            >
+              About
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => router.push("/privacy-policy")}
+              className="hover:text-[#1f2937] transition-colors"
+            >
+              Privacy Policy
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => router.push("/licensing")}
+              className="hover:text-[#1f2937] transition-colors"
+            >
+              Licensing
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => router.push("/contact")}
+              className="hover:text-[#1f2937] transition-colors"
+            >
+              Contact
+            </button>
+          </li>
+        </ul>
 
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+        {/* Divider */}
+        <hr className="w-full border-gray-200 dark:border-gray-700" />
+
+        {/* Copyright */}
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
           © {new Date().getFullYear()}{" "}
           <button
             onClick={() => router.push("/")}
             className="hover:underline font-medium"
           >
-            Blogs4U™
+            Blog4U™
           </button>
           . All rights reserved.
         </p>

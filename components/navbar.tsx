@@ -25,8 +25,17 @@ const FlipNav = () => {
 };
 
 const Logo = () => {
+  const router = useRouter();
   // Temp logo from https://logoipsum.com/
-  return <Image src="/Blogs4u.png" alt="Logo" width={100} height={100} />;
+  return (
+    <Image
+      onClick={() => router.push("/")}
+      src="/Blogs4u.png"
+      alt="Logo"
+      width={100}
+      height={100}
+    />
+  );
 };
 
 const NavLeft = ({
@@ -87,7 +96,7 @@ const NavRight = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => router.push("/login")}
-        className="px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent font-medium rounded-md whitespace-nowrap"
+        className="px-4 py-2 bg-transparent text-[#111827] font-medium rounded-md border border-[#111827] hover:bg-[#111827] hover:text-white transition-colors duration-200 whitespace-nowrap"
       >
         Login
       </motion.button>
@@ -95,7 +104,7 @@ const NavRight = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => router.push("/signup")}
-        className="px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-medium rounded-md whitespace-nowrap"
+        className="px-4 py-2 bg-[#111827] text-white font-medium rounded-md hover:bg-[#1f2937] transition-colors duration-200 whitespace-nowrap"
       >
         Sign up
       </motion.button>

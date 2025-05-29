@@ -1,8 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
-import { verifyToken } from "@/lib/jwt"; 
+import { verifyToken } from "@/lib/jwt";
 
 export async function middleware(req: NextRequest) {
-   const token = req.cookies.get("token")?.value;
+  const token = req.cookies.get("token")?.value;
 
   const publicRoutes = ["/login", "/signup", "/"];
 
@@ -15,11 +15,11 @@ export async function middleware(req: NextRequest) {
   }
 
   try {
-    const payload = await verifyToken(token); 
+    const payload = await verifyToken(token);
     if (!payload) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
-   
+
     return NextResponse.next();
   } catch {
     return NextResponse.redirect(new URL("/login", req.url));
@@ -27,5 +27,8 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/profile/:path*", "/api/protected/:path*"], 
+  matcher: [
+    "/(dashboard|createBlog|MyAccount|MyBlogs)/:path*",
+    "/api/protected/:path*",
+  ],
 };
