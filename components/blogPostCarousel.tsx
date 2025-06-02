@@ -87,6 +87,7 @@ const BlogPostCarousel = () => {
 };
 
 const Post = ({ imgUrl, author, title, description }: PostType) => {
+  const [imageError, setImageError] = useState(false);
   return (
     <div
       className="relative shrink-0 cursor-pointer transition-transform hover:-translate-y-1"
@@ -96,11 +97,12 @@ const Post = ({ imgUrl, author, title, description }: PostType) => {
       }}
     >
       <Image
-        src={imgUrl}
+        src={imageError ? "/fallback-image.jpg" : imgUrl}
         className="mb-3 h-[200px] w-full rounded-lg object-cover"
         alt={`An image for a fake blog post titled ${title}`}
         height={100}
         width={100}
+        onError={() => setImageError(true)}
       />
       <span className="rounded-md border-[1px] border-neutral-500 px-1.5 py-1 text-xs uppercase text-neutral-500">
         {author}

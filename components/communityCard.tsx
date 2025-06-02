@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 
 interface CommunityCardProps {
@@ -14,6 +14,7 @@ const CommunityCard: React.FC<CommunityCardProps> = ({
   image,
   onClick,
 }) => {
+  const [imageError, setImageError] = useState(false);
   return (
     <div className="w-full group/card">
       <div
@@ -24,10 +25,11 @@ const CommunityCard: React.FC<CommunityCardProps> = ({
       >
         {/* Background Image */}
         <Image
-          src={image}
+          src={imageError ? "/fallback-image.jpg" : image}
           alt={`${name} background`}
           fill
           className="object-cover absolute inset-0 z-0"
+          onError={() => setImageError(true)}
         />
 
         {/* Dark overlay on hover */}
