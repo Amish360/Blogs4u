@@ -5,6 +5,7 @@ import communityBlogsReducer from "./slices/communityBlogsSlice";
 import categoriesReducer from "./slices/categoriesSlice";
 import blogDetailReducer from "./slices/blogDetailSlice";
 import bestAuthorReducer from "./slices/bestAuthorsSlice";
+import authorDetailReducer from "./slices/authorSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     categories: categoriesReducer,
     blogDetail: blogDetailReducer,
     bestAuthors: bestAuthorReducer,
+    authorDetail: authorDetailReducer,
   },
 });
 
