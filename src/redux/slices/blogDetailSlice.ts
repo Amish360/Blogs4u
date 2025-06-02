@@ -9,9 +9,10 @@ export interface Blog {
   createdAt: string;
   updatedAt: string;
   user: {
+    avatarUrl: string | undefined;
     id: number;
     name: string;
-    avatarUrl?: string;
+    email: string;
   };
   category: {
     id: number;

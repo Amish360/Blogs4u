@@ -30,6 +30,7 @@ export const BentoGridItem = ({
   icon,
   image,
   onClick,
+  author,
 }: {
   className?: string;
   title?: string | React.ReactNode;
@@ -38,8 +39,15 @@ export const BentoGridItem = ({
   icon?: React.ReactNode;
   image?: string;
   onClick?: () => void;
+  author?: {
+    id: number;
+    name: string;
+    avatarUrl?: string;
+    onClick?: () => void;
+  };
 }) => {
   const [imageError, setImageError] = useState(false);
+
   return (
     <div
       className={cn(
@@ -49,6 +57,7 @@ export const BentoGridItem = ({
       onClick={onClick}
     >
       {header}
+
       {image && (
         <div className="relative h-40 w-full rounded-md overflow-hidden">
           <Image
@@ -60,6 +69,7 @@ export const BentoGridItem = ({
           />
         </div>
       )}
+
       <div className="transition duration-200 group-hover/bento:translate-x-2">
         {icon}
         <div className="mt-2 mb-2 font-sans font-bold text-neutral-600 dark:text-neutral-200">
@@ -69,6 +79,27 @@ export const BentoGridItem = ({
           {description}
         </div>
       </div>
+
+      {author && (
+        <div
+          className="flex items-center gap-2 mt-2 cursor-pointer hover:underline text-sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            author.onClick?.();
+          }}
+        >
+          <Image
+            src={author.avatarUrl || "/default-avatar.png"}
+            alt={author.name}
+            width={24}
+            height={24}
+            className="rounded-full object-cover"
+          />
+          <span className="text-neutral-700 dark:text-neutral-300">
+            {author.name}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

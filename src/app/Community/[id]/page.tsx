@@ -55,6 +55,12 @@ const CommunityPage = () => {
               description={blog.content.slice(0, 100) + "..."}
               image={blog.coverImage || "/default.jpg"}
               onClick={() => router.push(`/blogDetail/${blog.id}`)}
+              author={{
+                id: blog.user.id,
+                name: blog.user.name,
+                avatarUrl: blog.user.avatarUrl,
+                onClick: () => router.push(`/author/${blog.user.id}`),
+              }}
             />
           ))}
         </BlogsGrid>
