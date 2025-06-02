@@ -142,7 +142,7 @@ const MyBlogs = () => {
                     </p>
                     <Button
                       variant="outline"
-                      onClick={() => router.push(`/blogDetail/${blog.id}`)}
+                      onClick={() => router.push(`/blogPage/${blog.id}`)}
                       className="text-sm"
                     >
                       Read More

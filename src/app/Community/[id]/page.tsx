@@ -54,7 +54,7 @@ const CommunityPage = () => {
               title={blog.title}
               description={blog.content.slice(0, 100) + "..."}
               image={blog.coverImage || "/default.jpg"}
-              onClick={() => router.push(`/blogDetail/${blog.id}`)}
+              onClick={() => router.push(`/blogPage/${blog.id}`)}
               author={{
                 id: blog.user.id,
                 name: blog.user.name,
