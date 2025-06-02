@@ -29,6 +29,7 @@ const EditProfile = () => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [imageError, setImageError] = useState(false);
 
   const [errors, setErrors] = useState<{
     name?: string;
@@ -126,10 +127,11 @@ const EditProfile = () => {
           <div className="flex flex-col items-center gap-4">
             <div className="relative h-24 w-24 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-700">
               <Image
-                src={previewUrl}
+                src={imageError ? "/fallback-image.jpg" : previewUrl}
                 alt="Avatar Preview"
                 layout="fill"
                 objectFit="cover"
+                onError={() => setImageError(true)}
               />
             </div>
 

@@ -64,6 +64,7 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
   };
 
   const { src, button, title } = slide;
+  const [imageError, setImageError] = useState(false);
 
   return (
     <div className="[perspective:1200px] [transform-style:preserve-3d]">
@@ -97,12 +98,13 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
               opacity: current === index ? 1 : 0.5,
             }}
             alt={title}
-            src={src}
+            src={imageError ? "/fallback-image.jpg" : src}
             height={1000}
             width={1000}
             onLoad={imageLoaded}
             loading="eager"
             decoding="sync"
+            onError={() => setImageError(true)}
           />
           {current === index && (
             <div className="absolute inset-0 bg-black/30 transition-all duration-1000" />

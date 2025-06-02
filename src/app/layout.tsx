@@ -5,6 +5,7 @@ import { BackButton } from "@/components/backButton";
 import Footer from "@/components/footer";
 import "./globals.css";
 import { ReduxProvider } from "./providers";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,10 @@ export default function RootLayout({
       >
         <FlipNavWrapper />
         <BackButton />
-        <ReduxProvider>{children}</ReduxProvider>
+        <ReduxProvider>
+          {children}
+          <Toaster position="top-center" />
+        </ReduxProvider>
         <Footer />
       </body>
     </html>
