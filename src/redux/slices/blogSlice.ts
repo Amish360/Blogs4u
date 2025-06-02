@@ -12,6 +12,13 @@ interface Blog {
     id: number;
     name: string;
   };
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    avatarUrl?: string;
+    bio?: string;
+  };
 }
 
 interface BlogState {

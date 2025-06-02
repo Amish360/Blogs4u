@@ -173,6 +173,23 @@ const BlogDetail = () => {
                 </h1>
               )}
               <p className="text-sm text-gray-400 my-2">
+                {blog?.user && (
+                  <div className="flex items-center gap-3 mt-2">
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden border">
+                      <Image
+                        src={blog.user.avatarUrl || "/fallback-avatar.jpg"}
+                        alt={blog.user.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                        {blog.user.name}
+                      </p>
+                    </div>
+                  </div>
+                )}
                 {blog?.createdAt
                   ? new Date(blog.createdAt).toLocaleDateString()
                   : "Unknown Date"}{" "}

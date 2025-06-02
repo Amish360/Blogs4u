@@ -7,6 +7,8 @@ interface Blog {
   coverImage?: string;
   createdAt: string;
   user: {
+    avatarUrl: string | undefined;
+    id: number;
     name: string;
     email: string;
   };
