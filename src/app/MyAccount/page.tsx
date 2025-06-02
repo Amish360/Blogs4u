@@ -58,6 +58,9 @@ const Account = () => {
               <Button onClick={() => router.push("/MyAccount/EditProfile")}>
                 Edit Profile
               </Button>
+              <Button onClick={() => router.push("/createBlog")}>
+                Create Blog
+              </Button>
               <Button variant="outline" onClick={handleLogout}>
                 Logout
               </Button>

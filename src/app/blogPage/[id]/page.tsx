@@ -33,6 +33,7 @@ const BlogDetail = () => {
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string>("");
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -146,11 +147,12 @@ const BlogDetail = () => {
         {coverPreview && (
           <div className="w-full h-64 bg-gray-200 overflow-hidden relative">
             <Image
-              src={coverPreview}
+              src={imageError ? "/fallback-image.jpg" : coverPreview}
               alt="Cover"
               layout="fill"
               objectFit="cover"
               className="rounded-t-2xl"
+              onError={() => setImageError(true)}
             />
           </div>
         )}

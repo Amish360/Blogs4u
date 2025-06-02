@@ -1,306 +1,236 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState, useMemo, JSX } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import Rating from "./rating";
 
+import { useDispatch, useSelector } from "react-redux";
+import { fetchBestAuthors } from "@/src/redux/slices/bestAuthorsSlice";
+import { AppDispatch, RootState } from "@/src/redux/store";
+
+type Card = {
+  id: string;
+  title: string;
+  description: string;
+  rating: number;
+  src: string;
+  ctaText: string;
+  ctaLink: string;
+  content: () => JSX.Element;
+};
+
 export function ExpandableCardDemo() {
-  const [active, setActive] = useState<(typeof cards)[number] | boolean | null>(
-    null
+  const dispatch = useDispatch<AppDispatch>();
+  const { authors, status, error } = useSelector(
+    (state: RootState) => state.bestAuthors
   );
+
+  const [active, setActive] = useState<Card | null>(null);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const id = useId();
   const ref = useRef<HTMLDivElement>(null);
 
+  // Fetch authors once on mount
+  useEffect(() => {
+    dispatch(fetchBestAuthors());
+  }, [dispatch]);
+
+  // Escape key closes active card
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setActive(false);
+        setActive(null);
       }
     }
 
-    if (active && typeof active === "object") {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-
+    document.body.style.overflow = active ? "hidden" : "auto";
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [active]);
 
   useOutsideClick(ref, () => setActive(null));
 
+  // Prepare cards from authors data, memoized for performance
+  const cards: Card[] = useMemo(() => {
+    return authors.map((author) => ({
+      id: String(author.id), // ensure string for consistency
+      title: `${author._count.blogs} Blog${
+        author._count.blogs !== 1 ? "s" : ""
+      }`,
+      description: author.name,
+      rating: Math.min(author._count.blogs, 5),
+      src: author.avatarUrl || "/fallback-image.jpg",
+      ctaText: "Visit",
+      ctaLink: `/authors/${author.id}`,
+      content: () => <p>{author.bio ?? "No bio available."}</p>,
+    }));
+  }, [authors]);
+
+  if (status === "loading") return <p className="text-center">Loading...</p>;
+  if (status === "failed")
+    return <p className="text-center text-red-500">{error}</p>;
+
+  // Handle image load errors for individual cards
+  const handleImageError = (cardId: string) => {
+    setImageErrors((prev) => ({ ...prev, [cardId]: true }));
+  };
+
   return (
     <>
+      {/* Background overlay when a card is active */}
       <AnimatePresence>
-        {active && typeof active === "object" && (
+        {active && (
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={{ opacity: 0.4 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 h-full w-full z-10"
+            className="fixed inset-0 bg-black z-10"
           />
         )}
       </AnimatePresence>
+
+      {/* Expanded card modal */}
       <AnimatePresence>
-        {active && typeof active === "object" ? (
-          <div className="fixed inset-0  grid place-items-center z-[100]">
+        {active && (
+          <div className="fixed inset-0 grid place-items-center z-[100] px-4">
             <motion.button
-              key={`button-${active.title}-${id}`}
+              key={`close-btn-${active.id}-${id}`}
               layout
-              initial={{
-                opacity: 0,
-              }}
-              animate={{
-                opacity: 1,
-              }}
-              exit={{
-                opacity: 0,
-                transition: {
-                  duration: 0.05,
-                },
-              }}
-              className="flex absolute top-2 right-2 lg:hidden items-center justify-center bg-white rounded-full h-6 w-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.05 } }}
+              aria-label="Close card details"
+              className="flex absolute top-4 right-4 lg:hidden items-center justify-center bg-white rounded-full h-8 w-8 shadow-md"
               onClick={() => setActive(null)}
             >
               <CloseIcon />
             </motion.button>
+
             <motion.div
-              layoutId={`card-${active.title}-${id}`}
+              layoutId={`card-${active.id}-${id}`}
               ref={ref}
-              className="w-full max-w-[500px]  h-full md:h-fit md:max-h-[90%]  flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden"
+              className="w-full max-w-md max-h-[90vh] flex flex-col bg-white dark:bg-neutral-900 rounded-3xl overflow-hidden shadow-lg"
             >
-              <motion.div layoutId={`image-${active.title}-${id}`}>
+              <motion.div
+                layoutId={`image-${active.id}-${id}`}
+                className="relative w-full h-64"
+              >
                 <Image
                   priority
-                  width={200}
-                  height={200}
-                  src={active.src}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 500px"
+                  src={
+                    imageErrors[active.id] ? "/fallback-image.jpg" : active.src
+                  }
                   alt={active.title}
-                  className="w-full h-80 lg:h-80 sm:rounded-tr-lg sm:rounded-tl-lg object-cover object-top"
+                  className="object-cover object-top rounded-t-3xl"
+                  onError={() => handleImageError(active.id)}
                 />
               </motion.div>
 
-              <div>
-                <div className="flex justify-between items-start p-4">
-                  <div className="">
-                    <motion.h3
-                      layoutId={`title-${active.title}-${id}`}
-                      className="font-medium text-neutral-700 dark:text-neutral-200 text-base"
-                    >
-                      {active.title}
-                    </motion.h3>
-                    <motion.div>
-                      <Rating rating={active.rating} />
-                    </motion.div>
-                    <motion.p
-                      layoutId={`description-${active.description}-${id}`}
-                      className="text-neutral-600 dark:text-neutral-400 text-base"
-                    >
-                      {active.description}
-                    </motion.p>
-                  </div>
+              <div className="p-4 flex flex-col flex-grow">
+                <motion.h3
+                  layoutId={`title-${active.id}-${id}`}
+                  className="font-semibold text-neutral-800 dark:text-neutral-200 text-lg"
+                >
+                  {active.title}
+                </motion.h3>
+                <Rating rating={active.rating} />
+                <motion.p
+                  layoutId={`description-${active.id}-${id}`}
+                  className="text-neutral-600 dark:text-neutral-400 mt-1 mb-4"
+                >
+                  {active.description}
+                </motion.p>
 
-                  <motion.a
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    href={active.ctaLink}
-                    target="_blank"
-                    className="px-4 py-3 text-sm rounded-full font-bold bg-green-500 text-white"
-                  >
-                    {active.ctaText}
-                  </motion.a>
-                </div>
-                <div className="pt-4 relative px-4">
-                  <motion.div
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-neutral-600 text-xs md:text-sm lg:text-base h-40 md:h-fit pb-10 flex flex-col items-start gap-4 overflow-auto dark:text-neutral-400 [mask:linear-gradient(to_bottom,white,white,transparent)] [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
-                  >
-                    {typeof active.content === "function"
-                      ? active.content()
-                      : active.content}
-                  </motion.div>
-                </div>
+                <motion.div className="flex-grow overflow-auto text-neutral-700 dark:text-neutral-300 text-sm md:text-base">
+                  {active.content()}
+                </motion.div>
+
+                <motion.a
+                  layout
+                  href={active.ctaLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-block px-6 py-2 rounded-full bg-green-600 text-white text-center font-semibold hover:bg-green-700 transition"
+                >
+                  {active.ctaText}
+                </motion.a>
               </div>
             </motion.div>
           </div>
-        ) : null}
+        )}
       </AnimatePresence>
-      <ul className="max-w-2xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 items-start gap-4">
-        {cards.map((card, index) => (
-          <motion.div
-            layoutId={`card-${card.title}-${id}`}
-            key={index}
+
+      {/* Cards grid */}
+      <ul className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+        {cards.map((card) => (
+          <motion.li
+            layoutId={`card-${card.id}-${id}`}
+            key={card.id}
             onClick={() => setActive(card)}
-            className="p-4 flex flex-col  hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl cursor-pointer"
+            className="cursor-pointer rounded-xl overflow-hidden shadow-md hover:shadow-lg bg-white dark:bg-neutral-900 transition"
+            aria-label={`Open details for ${card.description}`}
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setActive(card);
+              }
+            }}
           >
-            <div className="flex gap-4 flex-col  w-full">
-              <motion.div layoutId={`image-${card.title}-${id}`}>
-                <Image
-                  width={100}
-                  height={100}
-                  src={card.src}
-                  alt={card.title}
-                  className="h-60 w-full  rounded-lg object-cover object-top"
-                />
-              </motion.div>
-              <div className="flex justify-center items-center flex-col">
-                <motion.h3
-                  layoutId={`title-${card.title}-${id}`}
-                  className="font-medium text-neutral-800 dark:text-neutral-200 text-center md:text-left text-base"
-                >
-                  {card.title}
-                </motion.h3>
-                <motion.div>
-                  <Rating rating={card.rating} />
-                </motion.div>
-                <motion.p
-                  layoutId={`description-${card.description}-${id}`}
-                  className="text-neutral-600 dark:text-neutral-400 text-center md:text-left text-base"
-                >
-                  {card.description}
-                </motion.p>
-              </div>
+            <div className="relative w-full h-64">
+              <Image
+                priority
+                fill
+                sizes="(max-width: 768px) 100vw, 400px"
+                src={imageErrors[card.id] ? "/fallback-image.jpg" : card.src}
+                alt={card.description}
+                className="object-cover object-top"
+                onError={() => handleImageError(card.id)}
+              />
             </div>
-          </motion.div>
+            <div className="p-4 text-center md:text-left">
+              <motion.h3
+                layoutId={`title-${card.id}-${id}`}
+                className="font-semibold text-neutral-900 dark:text-neutral-200 text-lg"
+              >
+                {card.title}
+              </motion.h3>
+              <Rating rating={card.rating} />
+              <motion.p
+                layoutId={`description-${card.id}-${id}`}
+                className="text-neutral-600 dark:text-neutral-400 mt-1"
+              >
+                {card.description}
+              </motion.p>
+            </div>
+          </motion.li>
         ))}
       </ul>
     </>
   );
 }
 
-export const CloseIcon = () => {
-  return (
-    <motion.svg
-      initial={{
-        opacity: 0,
-      }}
-      animate={{
-        opacity: 1,
-      }}
-      exit={{
-        opacity: 0,
-        transition: {
-          duration: 0.05,
-        },
-      }}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-4 w-4 text-black"
-    >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M18 6l-12 12" />
-      <path d="M6 6l12 12" />
-    </motion.svg>
-  );
-};
-
-const cards = [
-  {
-    description: "Lana Del Rey",
-    title: "Summertime Sadness",
-    rating: 5,
-    src: "",
-    ctaText: "Visit",
-    ctaLink: "https://ui.aceternity.com/templates",
-    content: () => {
-      return (
-        <p>
-          Lana Del Rey, an iconic American singer-songwriter, is celebrated for
-          her melancholic and cinematic music style. Born Elizabeth Woolridge
-          Grant in New York City, she has captivated audiences worldwide with
-          her haunting voice and introspective lyrics. <br /> <br /> Her songs
-          often explore themes of tragic romance, glamour, and melancholia,
-          drawing inspiration from both contemporary and vintage pop culture.
-          With a career that has seen numerous critically acclaimed albums, Lana
-          Del Rey has established herself as a unique and influential figure in
-          the music industry, earning a dedicated fan base and numerous
-          accolades.
-        </p>
-      );
-    },
-  },
-  {
-    description: "Babbu Maan",
-    title: "Mitran Di Chhatri",
-    rating: 3.5,
-    src: "",
-    ctaText: "Visit",
-    ctaLink: "https://ui.aceternity.com/templates",
-    content: () => {
-      return (
-        <p>
-          Babu Maan, a legendary Punjabi singer, is renowned for his soulful
-          voice and profound lyrics that resonate deeply with his audience. Born
-          in the village of Khant Maanpur in Punjab, India, he has become a
-          cultural icon in the Punjabi music industry. <br /> <br /> His songs
-          often reflect the struggles and triumphs of everyday life, capturing
-          the essence of Punjabi culture and traditions. With a career spanning
-          over two decades, Babu Maan has released numerous hit albums and
-          singles that have garnered him a massive fan following both in India
-          and abroad.
-        </p>
-      );
-    },
-  },
-
-  {
-    description: "Metallica",
-    title: "For Whom The Bell Tolls",
-    src: "",
-    rating: 2.5,
-    ctaText: "Visit",
-    ctaLink: "https://ui.aceternity.com/templates",
-    content: () => {
-      return (
-        <p>
-          Metallica, an iconic American heavy metal band, is renowned for their
-          powerful sound and intense performances that resonate deeply with
-          their audience. Formed in Los Angeles, California, they have become a
-          cultural icon in the heavy metal music industry. <br /> <br /> Their
-          songs often reflect themes of aggression, social issues, and personal
-          struggles, capturing the essence of the heavy metal genre. With a
-          career spanning over four decades, Metallica has released numerous hit
-          albums and singles that have garnered them a massive fan following
-          both in the United States and abroad.
-        </p>
-      );
-    },
-  },
-  {
-    description: "Lord Himesh",
-    title: "Aap Ka Suroor",
-    src: "",
-    rating: 4.5,
-    ctaText: "Visit",
-    ctaLink: "https://ui.aceternity.com/templates",
-    content: () => {
-      return (
-        <p>
-          Himesh Reshammiya, a renowned Indian music composer, singer, and
-          actor, is celebrated for his distinctive voice and innovative
-          compositions. Born in Mumbai, India, he has become a prominent figure
-          in the Bollywood music industry. <br /> <br /> His songs often feature
-          a blend of contemporary and traditional Indian music, capturing the
-          essence of modern Bollywood soundtracks. With a career spanning over
-          two decades, Himesh Reshammiya has released numerous hit albums and
-          singles that have garnered him a massive fan following both in India
-          and abroad.
-        </p>
-      );
-    },
-  },
-];
+export const CloseIcon = () => (
+  <motion.svg
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0, transition: { duration: 0.05 } }}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="h-5 w-5 text-black dark:text-white"
+  >
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <path d="M18 6l-12 12" />
+    <path d="M6 6l12 12" />
+  </motion.svg>
+);

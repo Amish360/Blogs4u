@@ -1,5 +1,7 @@
+"use client";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useState } from "react";
 
 export const BlogsGrid = ({
   className,
@@ -37,6 +39,7 @@ export const BentoGridItem = ({
   image?: string;
   onClick?: () => void;
 }) => {
+  const [imageError, setImageError] = useState(false);
   return (
     <div
       className={cn(
@@ -49,10 +52,11 @@ export const BentoGridItem = ({
       {image && (
         <div className="relative h-40 w-full rounded-md overflow-hidden">
           <Image
-            src={image}
+            src={imageError ? "/fallback-image.jpg" : image}
             alt="Blog Thumbnail"
             fill
             className="object-cover"
+            onError={() => setImageError(true)}
           />
         </div>
       )}
