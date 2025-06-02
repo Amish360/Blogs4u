@@ -62,7 +62,7 @@ export function ExpandableCardDemo() {
       rating: Math.min(author._count.blogs, 5),
       src: author.avatarUrl || "/fallback-image.jpg",
       ctaText: "Visit",
-      ctaLink: `/authors/${author.id}`,
+      ctaLink: `/author/${author.id}`,
       content: () => <p>{author.bio ?? "No bio available."}</p>,
     }));
   }, [authors]);
