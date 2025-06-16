@@ -4,6 +4,9 @@ import { Dispatch, SetStateAction, useState } from "react";
 import Image from "next/image";
 import { FiMenu, FiArrowRight } from "react-icons/fi";
 import { useRouter } from "next/navigation"; // for Pages Router
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/src/redux/store";
+import { logout } from "@/src/redux/slices/authSlice";
 
 const FlipNavWrapper = () => {
   return (
@@ -90,6 +93,34 @@ const NavLink = ({ text }: { text: string }) => {
 
 const NavRight = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
+  );
+
+  const handleLogout = () => {
+    dispatch(logout());
+    router.push("/login");
+  };
+
+  if (isAuthenticated && user) {
+    return (
+      <div className="flex items-center gap-4">
+        <span className="text-gray-800 font-medium hidden sm:inline-block">
+          Welcome, {user.name.split(" ")[0]}!
+        </span>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 transition-colors duration-200"
+        >
+          Logout
+        </motion.button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-4">
       <motion.button
