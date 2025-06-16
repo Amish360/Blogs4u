@@ -1,19 +1,25 @@
+// app/layout.tsx
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import FlipNavWrapper from "@/components/navbar";
-import { BackButton } from "@/components/backButton";
+import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import Footer from "@/components/footer";
-import "./globals.css";
-import { ReduxProvider } from "./providers";
 import { Toaster } from "react-hot-toast";
+import "./globals.css";
+import ClientLayoutWrapper from "@/components/clientLayoutWrapper";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["latin"],
+});
+
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  weight: ["400", "500", "600"],
   subsets: ["latin"],
 });
 
@@ -24,20 +30,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} antialiased`}
       >
-        <FlipNavWrapper />
-        <BackButton />
-        <ReduxProvider>
-          {children}
-          <Toaster position="top-center" />
-        </ReduxProvider>
+        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+        <Toaster position="top-center" />
         <Footer />
       </body>
     </html>

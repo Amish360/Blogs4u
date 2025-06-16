@@ -3,17 +3,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const hiddenPaths = [
-  "/",
-  "/MyBlogs",
-  "/Community",
-  "/FAQ",
-  "/Support",
-  "/MyAccount",
-  "/login",
-  "/Signup",
-  "/MyAccount/EditProfile",
-];
+const hiddenPaths = ["/", "/Community", "/FAQ", "/Support", "/createBlog"];
 
 export const BackButton = () => {
   const pathname = usePathname();

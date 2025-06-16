@@ -2,23 +2,24 @@
 import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface CommunityCardProps {
   name: string;
   image: string;
-  onClick?: () => void;
+  href: string;
 }
 
 const CommunityCard: React.FC<CommunityCardProps> = ({
   name,
   image,
-  onClick,
+  href,
 }) => {
   const [imageError, setImageError] = useState(false);
   return (
     <div className="w-full group/card">
-      <div
-        onClick={onClick}
+      <Link
+        href={href}
         className={cn(
           "relative cursor-pointer overflow-hidden card h-96 rounded-md shadow-xl max-w-sm mx-auto flex flex-col justify-between p-4"
         )}
@@ -37,12 +38,14 @@ const CommunityCard: React.FC<CommunityCardProps> = ({
 
         {/* Text Content */}
         <div className="z-20 relative mt-auto">
-          <h1 className="font-bold text-xl md:text-2xl text-white">{name}</h1>
+          <h1 className="font-serif font-semibold text-xl md:text-2xl text-white">
+            {name}
+          </h1>
           <p className="font-normal text-sm text-gray-200 my-4">
             Explore blogs and discussions from the {name} community.
           </p>
         </div>
-      </div>
+      </Link>
     </div>
   );
 };

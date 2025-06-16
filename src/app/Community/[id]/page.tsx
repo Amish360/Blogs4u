@@ -1,72 +1,64 @@
-"use client";
-import React, { useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchCategories } from "@/src/redux/slices/categoriesSlice";
-import { fetchCommunityBlogs } from "@/src/redux/slices/communityBlogsSlice";
-import { RootState, AppDispatch } from "@/src/redux/store";
+import { notFound } from "next/navigation";
 import { BlogsGrid, BentoGridItem } from "@/components/blogsGrid";
+import {
+  getAllAuthors,
+  getBlogsByCategory,
+  getCategories,
+  getCategoryBySlug,
+} from "@/lib/content";
 
-const CommunityPage = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
-  const params = useParams();
+export async function generateStaticParams() {
+  return getCategories().map((category) => ({ id: category.slug }));
+}
 
-  const categoryID = parseInt(params.id as string); // 👈 get id from URL
+export default async function CommunityPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const category = getCategoryBySlug(id);
 
-  const { list: categories } = useSelector(
-    (state: RootState) => state.categories
-  );
-  const { blogs, loading, error } = useSelector(
-    (state: RootState) => state.communityBlogs
-  );
+  if (!category) {
+    notFound();
+  }
 
-  useEffect(() => {
-    if (categories.length === 0) {
-      dispatch(fetchCategories());
-    }
-  }, [categories.length, dispatch]);
-
-  useEffect(() => {
-    if (categoryID) {
-      dispatch(fetchCommunityBlogs({ categoryID }));
-    }
-  }, [categoryID, dispatch]);
-
-  const category = categories.find((cat) => cat.id === categoryID);
+  const blogs = getBlogsByCategory(id);
+  const authors = getAllAuthors();
 
   return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold capitalize mb-6">
-        {category?.name || "Community"}
+    <div className="p-8 bg-[var(--paper)]">
+      <h1 className="font-serif text-4xl font-semibold capitalize mb-6 text-[var(--ink)]">
+        {category.name}
       </h1>
-      {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p className="text-red-500">{error}</p>
-      ) : blogs.length === 0 ? (
-        <p>No blogs found in this community</p>
+      {blogs.length === 0 ? (
+        <p className="text-[var(--ink-soft)]">No blogs found in this community</p>
       ) : (
         <BlogsGrid>
-          {blogs.map((blog) => (
-            <BentoGridItem
-              key={blog.id}
-              title={blog.title}
-              description={blog.content.slice(0, 100) + "..."}
-              image={blog.coverImage || "/default.jpg"}
-              onClick={() => router.push(`/blogPage/${blog.id}`)}
-              author={{
-                id: blog.user.id,
-                name: blog.user.name,
-                avatarUrl: blog.user.avatarUrl,
-                onClick: () => router.push(`/author/${blog.user.id}`),
-              }}
-            />
-          ))}
+          {blogs.map((blog) => {
+            const author = authors.find((a) => a.slug === blog.author);
+            return (
+              <BentoGridItem
+                key={blog.slug}
+                title={blog.title}
+                description={blog.excerpt}
+                image={blog.coverImage}
+                href={`/blogPage/${blog.slug}`}
+                author={
+                  author
+                    ? {
+                        id: author.slug,
+                        name: author.name,
+                        avatarUrl: author.avatarUrl,
+                        href: `/author/${author.slug}`,
+                      }
+                    : undefined
+                }
+              />
+            );
+          })}
         </BlogsGrid>
       )}
     </div>
   );
-};
-
-export default CommunityPage;
+}

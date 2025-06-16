@@ -1,0 +1,33 @@
+---
+title: "The Quiet Rise of Local-First Software"
+author: "jane-doe"
+category: "technology"
+coverImage: "https://images.unsplash.com/photo-1605379399642-870262d3d051?w=1600&q=80&auto=format&fit=crop"
+publishedAt: "2026-06-12"
+excerpt: "Why a growing number of developers are ditching the cloud-first default and building apps that work offline, sync later, and never lose your data."
+featured: true
+---
+
+For most of the last decade, "cloud-first" was the unquestioned default for new software. Your notes, your photos, your documents — all of it lived on someone else's server, and your device was just a window into it. Lately, though, a quieter movement has been gaining ground: local-first software.
+
+## What local-first actually means
+
+Local-first apps store data on your device first and treat the network as an optional convenience rather than a hard dependency. You can keep working on a flight, in a basement with no signal, or during a server outage, and your changes sync automatically once you're back online. The philosophy borrows heavily from distributed systems research, particularly conflict-free replicated data types (CRDTs), which let multiple devices edit the same document offline and merge their changes without a central authority resolving conflicts.
+
+## Why now
+
+Three things converged to make this practical. Browsers got fast, persistent local storage (IndexedDB, OPFS). Phones got powerful enough to run real computation instead of just rendering server responses. And developers got tired of watching beloved apps get shut down the moment a company's servers went dark, taking years of user data with them.
+
+## The tradeoffs
+
+Local-first isn't free. Building conflict resolution that feels invisible to users is genuinely hard, and syncing rich media across devices still leans on cloud infrastructure whether you like it or not. Teams building these apps often end up maintaining sync servers anyway — the difference is that the server becomes a relay, not a single point of truth.
+
+## What to watch
+
+A handful of small teams are shipping genuinely delightful local-first products: writing tools, whiteboards, even spreadsheets that sync like magic. None of them are household names yet. But the pattern is spreading, and it's worth paying attention to, because it quietly answers a question users have been asking for years: why does my app stop working the moment my wifi does?
+
+- Faster perceived performance, since nothing waits on a round trip
+- Genuine offline support, not a degraded fallback mode
+- Data ownership that survives a company's server going away
+
+If the last wave of software was about moving everything to the cloud, this one might be about deciding what belongs there in the first place.

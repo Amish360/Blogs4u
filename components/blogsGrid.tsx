@@ -1,6 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 export const BlogsGrid = ({
@@ -29,7 +30,7 @@ export const BentoGridItem = ({
   header,
   icon,
   image,
-  onClick,
+  href,
   author,
 }: {
   className?: string;
@@ -38,12 +39,12 @@ export const BentoGridItem = ({
   header?: React.ReactNode;
   icon?: React.ReactNode;
   image?: string;
-  onClick?: () => void;
+  href?: string;
   author?: {
-    id: number;
+    id: number | string;
     name: string;
     avatarUrl?: string;
-    onClick?: () => void;
+    href?: string;
   };
 }) => {
   const [imageError, setImageError] = useState(false);
@@ -51,15 +52,14 @@ export const BentoGridItem = ({
   return (
     <div
       className={cn(
-        "group/bento shadow-input row-span-1 flex flex-col justify-between space-y-4 rounded-xl border border-neutral-200 bg-white p-4 transition duration-200 hover:shadow-xl dark:border-white/[0.2] dark:bg-black dark:shadow-none",
+        "group/bento shadow-input relative row-span-1 flex flex-col justify-between space-y-4 rounded-md border border-[var(--line)] bg-[var(--paper-raised)] p-4 transition duration-200 hover:shadow-xl",
         className
       )}
-      onClick={onClick}
     >
       {header}
 
       {image && (
-        <div className="relative h-40 w-full rounded-md overflow-hidden">
+        <div className="relative h-40 w-full rounded-sm overflow-hidden">
           <Image
             src={imageError ? "/fallback-image.jpg" : image}
             alt="Blog Thumbnail"
@@ -72,34 +72,51 @@ export const BentoGridItem = ({
 
       <div className="transition duration-200 group-hover/bento:translate-x-2">
         {icon}
-        <div className="mt-2 mb-2 font-sans font-bold text-neutral-600 dark:text-neutral-200">
+        <div className="mt-2 mb-2 font-serif font-semibold text-[var(--ink)]">
           {title}
         </div>
-        <div className="font-sans text-xs font-normal text-neutral-600 dark:text-neutral-300">
+        <div className="font-sans text-xs font-normal text-[var(--ink-soft)]">
           {description}
         </div>
       </div>
 
-      {author && (
-        <div
-          className="flex items-center gap-2 mt-2 cursor-pointer hover:underline text-sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            author.onClick?.();
-          }}
-        >
-          <Image
-            src={author.avatarUrl || "/default-avatar.png"}
-            alt={author.name}
-            width={24}
-            height={24}
-            className="rounded-full object-cover"
-          />
-          <span className="text-neutral-700 dark:text-neutral-300">
-            {author.name}
-          </span>
-        </div>
+      {/* Stretched link: makes the whole card clickable without nesting <a> tags */}
+      {href && (
+        <Link href={href} className="absolute inset-0 z-0" aria-label={typeof title === "string" ? title : "View post"}>
+          <span className="sr-only">{typeof title === "string" ? title : "View post"}</span>
+        </Link>
       )}
+
+      {author && <AuthorLink author={author} />}
     </div>
   );
+};
+
+const AuthorLink = ({
+  author,
+}: {
+  author: { name: string; avatarUrl?: string; href?: string };
+}) => {
+  const inner = (
+    <div className="flex items-center gap-2 mt-2 text-sm">
+      <Image
+        src={author.avatarUrl || "/default-avatar.png"}
+        alt={author.name}
+        width={24}
+        height={24}
+        className="rounded-full object-cover"
+      />
+      <span className="text-[var(--ink-soft)]">{author.name}</span>
+    </div>
+  );
+
+  if (author.href) {
+    return (
+      <Link href={author.href} className="relative z-10 hover:underline w-fit">
+        {inner}
+      </Link>
+    );
+  }
+
+  return inner;
 };

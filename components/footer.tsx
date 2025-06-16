@@ -1,16 +1,18 @@
-"use client";
-
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import React from "react";
 
-const Footer = () => {
-  const router = useRouter();
+const FOOTER_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Community", href: "/Community" },
+  { label: "FAQ", href: "/FAQ" },
+  { label: "Support", href: "/Support" },
+];
 
+const Footer = () => {
   return (
-    <footer className="bg-white text-[#111827] border-t border-gray-200 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 mt-10">
+    <footer className="bg-[var(--paper-raised)] text-[var(--ink)] border-t border-[var(--line)] mt-10">
       <div className="max-w-5xl mx-auto px-6 py-10 flex flex-col items-center gap-6">
-        {/* Logo */}
         <div>
           <Image
             src="/Blogs4u.png"
@@ -21,54 +23,26 @@ const Footer = () => {
           />
         </div>
 
-        {/* Nav Links */}
-        <ul className="flex flex-wrap justify-center gap-6 text-sm font-medium">
-          <li>
-            <button
-              onClick={() => router.push("/about")}
-              className="hover:text-[#1f2937] transition-colors"
-            >
-              About
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => router.push("/privacy-policy")}
-              className="hover:text-[#1f2937] transition-colors"
-            >
-              Privacy Policy
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => router.push("/licensing")}
-              className="hover:text-[#1f2937] transition-colors"
-            >
-              Licensing
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => router.push("/contact")}
-              className="hover:text-[#1f2937] transition-colors"
-            >
-              Contact
-            </button>
-          </li>
+        <ul className="flex flex-wrap justify-center gap-6 text-sm font-medium font-sans">
+          {FOOTER_LINKS.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className="text-[var(--ink-soft)] hover:text-[var(--accent-teal)] transition-colors"
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
         </ul>
 
-        {/* Divider */}
-        <hr className="w-full border-gray-200 dark:border-gray-700" />
+        <hr className="w-full border-[var(--line)]" />
 
-        {/* Copyright */}
-        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-          © {new Date().getFullYear()}{" "}
-          <button
-            onClick={() => router.push("/")}
-            className="hover:underline font-medium"
-          >
-            Blog4U™
-          </button>
+        <p className="text-sm text-[var(--ink-faint)] text-center font-sans">
+          &copy; {new Date().getFullYear()}{" "}
+          <Link href="/" className="hover:underline font-medium text-[var(--ink-soft)]">
+            Blog4U&trade;
+          </Link>
           . All rights reserved.
         </p>
       </div>

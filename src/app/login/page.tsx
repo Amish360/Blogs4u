@@ -1,140 +1,69 @@
 "use client";
-import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
-import { LockIcon, MailIcon } from "lucide-react";
+
+import { useState } from "react";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/src/redux/store";
-import { loginUser } from "@/src/redux/slices/authSlice";
 
-// Types
-type LoginFormData = {
-  email: string;
-  password: string;
-};
+export default function LoginPage() {
+  const [form, setForm] = useState({ email: "", password: "" });
 
-type LoginFormError = Partial<Record<keyof LoginFormData, string>>;
-
-const Login = () => {
-  const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
-
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<LoginFormError>({});
-
-  const {
-    loading,
-    error: loginError,
-    isAuthenticated,
-  } = useSelector((state: RootState) => state.auth);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    if (id === "email") setEmail(value);
-    if (id === "password") setPassword(value);
-  };
-
-  const validate = (): LoginFormError => {
-    const validationErrors: LoginFormError = {};
-    if (!email.trim()) validationErrors.email = "Email is required";
-    if (!password.trim()) validationErrors.password = "Password is required";
-    return validationErrors;
-  };
-
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setError(validationErrors);
-      return;
-    }
-
-    setError({});
-    dispatch(loginUser({ email, password }));
+    toast("Login isn't connected to a backend yet.");
   };
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/home");
-    }
-  }, [isAuthenticated, router]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-sm md:max-w-md bg-white rounded-2xl shadow-md p-8 border border-gray-300">
-        <h1 className="text-3xl font-bold text-center mb-6">Login</h1>
+    <div className="max-w-md mx-auto mt-16 mb-24 p-6 sm:p-8 bg-[var(--paper-raised)] shadow-md rounded-md border border-[var(--line)]">
+      <h1 className="font-serif text-3xl font-semibold text-[var(--ink)] mb-2">
+        Log In
+      </h1>
+      <p className="text-sm text-[var(--ink-soft)] mb-6">
+        This form isn&rsquo;t wired to a backend yet — it&rsquo;s a preview of
+        the account flow, ready for a future auth service.
+      </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email Field */}
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <div className="relative mt-1">
-              <Input
-                id="email"
-                className="peer pe-10"
-                placeholder="Email"
-                value={email}
-                onChange={handleChange}
-                type="email"
-              />
-              <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 end-0 flex items-center pe-3">
-                <MailIcon size={16} aria-hidden="true" />
-              </div>
-            </div>
-            {error.email && (
-              <p className="text-red-500 text-sm mt-1">{error.email}</p>
-            )}
-          </div>
-
-          {/* Password Field */}
-          <div>
-            <Label htmlFor="password">Password</Label>
-            <div className="relative mt-1">
-              <Input
-                id="password"
-                className="peer pe-10"
-                placeholder="Password"
-                value={password}
-                onChange={handleChange}
-                type="password"
-              />
-              <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 end-0 flex items-center pe-3">
-                <LockIcon size={16} aria-hidden="true" />
-              </div>
-            </div>
-            {error.password && (
-              <p className="text-red-500 text-sm mt-1">{error.password}</p>
-            )}
-          </div>
-
-          {/* Login Button */}
-          <Button type="submit" className="w-full mt-4" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </Button>
-        </form>
-
-        {/* Login Error (from Redux) */}
-        {loginError && (
-          <p className="text-red-500 text-sm mt-4 text-center">{loginError}</p>
-        )}
-
-        {/* Sign Up Redirect */}
-        <div className="flex justify-center items-center mt-6 space-x-2 text-sm">
-          <p>Do not have an account?</p>
-          <Button
-            variant="link"
-            className="text-blue-600 p-0"
-            onClick={() => router.push("/signup")}
-          >
-            Sign Up
-          </Button>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            required
+          />
         </div>
-      </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            required
+          />
+        </div>
+
+        <Button type="submit" className="w-full">
+          Log In
+        </Button>
+      </form>
+
+      <p className="text-sm text-[var(--ink-soft)] mt-6 text-center">
+        Don&rsquo;t have an account?{" "}
+        <Link
+          href="/Signup"
+          className="text-[var(--accent-teal)] underline underline-offset-2"
+        >
+          Sign up
+        </Link>
+      </p>
     </div>
   );
-};
-
-export default Login;
+}

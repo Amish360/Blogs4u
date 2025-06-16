@@ -3,11 +3,25 @@ import { motion } from "framer-motion";
 import { Dispatch, SetStateAction, useState } from "react";
 import Image from "next/image";
 import { FiMenu, FiArrowRight } from "react-icons/fi";
-import { useRouter } from "next/navigation"; // for Pages Router
+import { useRouter } from "next/navigation";
+
+type NavItem = {
+  label: string;
+  href: string;
+};
+
+const NAV_ITEMS: NavItem[] = [
+  { label: "Home", href: "/" },
+  { label: "Community", href: "/Community" },
+  { label: "Write", href: "/createBlog" },
+  { label: "FAQ", href: "/FAQ" },
+  { label: "Support", href: "/Support" },
+  { label: "Log In", href: "/login" },
+];
 
 const FlipNavWrapper = () => {
   return (
-    <div className="bg-gray-50">
+    <div className="bg-[var(--paper)]">
       <FlipNav />
     </div>
   );
@@ -16,7 +30,7 @@ const FlipNavWrapper = () => {
 const FlipNav = () => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <nav className="bg-white p-4 border-b-[1px] border-gray-200 flex items-center justify-between relative">
+    <nav className="bg-[var(--paper-raised)] p-4 border-b border-[var(--line)] flex items-center justify-between relative font-sans">
       <NavLeft setIsOpen={setIsOpen} />
       <NavRight />
       <NavMenu isOpen={isOpen} />
@@ -26,7 +40,6 @@ const FlipNav = () => {
 
 const Logo = () => {
   const router = useRouter();
-  // Temp logo from https://logoipsum.com/
   return (
     <Image
       onClick={() => router.push("/")}
@@ -34,6 +47,7 @@ const Logo = () => {
       alt="Logo"
       width={100}
       height={100}
+      className="cursor-pointer"
     />
   );
 };
@@ -48,26 +62,24 @@ const NavLeft = ({
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="block lg:hidden text-gray-950 text-2xl"
+        className="block lg:hidden text-[var(--ink)] text-2xl"
         onClick={() => setIsOpen((pv) => !pv)}
       >
         <FiMenu />
       </motion.button>
       <Logo />
-      <NavLink text="MyBlogs" />
-      <NavLink text="Community" />
-      <NavLink text="Support" />
-      <NavLink text="FAQ" />
-      <NavLink text="MyAccount" />
+      {NAV_ITEMS.map((item) => (
+        <NavLink key={item.href} text={item.label} href={item.href} />
+      ))}
     </div>
   );
 };
 
-const NavLink = ({ text }: { text: string }) => {
+const NavLink = ({ text, href }: { text: string; href: string }) => {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(text);
+    router.push(href);
   };
 
   return (
@@ -76,11 +88,13 @@ const NavLink = ({ text }: { text: string }) => {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && handleClick()}
-      className="cursor-pointer hidden lg:block h-[30px] overflow-hidden font-medium"
+      className="cursor-pointer hidden lg:block h-[30px] overflow-hidden font-medium text-sm tracking-wide"
     >
       <motion.div whileHover={{ y: -30 }}>
-        <span className="flex items-center h-[30px] text-gray-500">{text}</span>
-        <span className="flex items-center h-[30px] text-indigo-600">
+        <span className="flex items-center h-[30px] text-[var(--ink-soft)]">
+          {text}
+        </span>
+        <span className="flex items-center h-[30px] text-[var(--accent-teal)]">
           {text}
         </span>
       </motion.div>
@@ -90,23 +104,16 @@ const NavLink = ({ text }: { text: string }) => {
 
 const NavRight = () => {
   const router = useRouter();
+
   return (
     <div className="flex items-center gap-4">
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => router.push("/login")}
-        className="px-4 py-2 bg-transparent text-[#111827] font-medium rounded-md border border-[#111827] hover:bg-[#111827] hover:text-white transition-colors duration-200 whitespace-nowrap"
+        onClick={() => router.push("/createBlog")}
+        className="px-4 py-2 bg-[var(--accent-teal)] text-[var(--paper-raised)] font-medium rounded-sm hover:opacity-90 transition-opacity duration-200 whitespace-nowrap text-sm"
       >
-        Login
-      </motion.button>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => router.push("/signup")}
-        className="px-4 py-2 bg-[#111827] text-white font-medium rounded-md hover:bg-[#1f2937] transition-colors duration-200 whitespace-nowrap"
-      >
-        Sign up
+        Write a Post
       </motion.button>
     </div>
   );
@@ -118,31 +125,32 @@ const NavMenu = ({ isOpen }: { isOpen: boolean }) => {
       variants={menuVariants}
       initial="closed"
       animate={isOpen ? "open" : "closed"}
-      className="absolute p-4 bg-white shadow-lg left-0 right-0 top-full origin-top flex flex-col gap-4"
+      className="absolute p-4 bg-[var(--paper-raised)] shadow-lg left-0 right-0 top-full origin-top flex flex-col gap-4 border-b border-[var(--line)]"
     >
-      <MenuLink text="MyBlogs" />
-      <MenuLink text="Community" />
-      <MenuLink text="Support" />
-      <MenuLink text="FAQ" />
-      <MenuLink text="MyAccount" />
+      {NAV_ITEMS.map((item) => (
+        <MenuLink key={item.href} text={item.label} href={item.href} />
+      ))}
     </motion.div>
   );
 };
 
-const MenuLink = ({ text }: { text: string }) => {
+const MenuLink = ({ text, href }: { text: string; href: string }) => {
   return (
     <motion.a
       variants={menuLinkVariants}
-      rel="nofollow"
-      href="#"
+      href={href}
       className="h-[30px] overflow-hidden font-medium text-lg flex items-start gap-2"
     >
       <motion.span variants={menuLinkArrowVariants}>
-        <FiArrowRight className="h-[30px] text-gray-950" />
+        <FiArrowRight className="h-[30px] text-[var(--ink)]" />
       </motion.span>
       <motion.div whileHover={{ y: -30 }}>
-        <span className="flex items-center h-[30px] text-gray-500">{text}</span>
-        <span className="flex items-center h-[30px] text-black">{text}</span>
+        <span className="flex items-center h-[30px] text-[var(--ink-soft)]">
+          {text}
+        </span>
+        <span className="flex items-center h-[30px] text-[var(--ink)]">
+          {text}
+        </span>
       </motion.div>
     </motion.a>
   );

@@ -1,5 +1,7 @@
+"use client";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 import useMeasure from "react-use-measure";
@@ -13,7 +15,19 @@ const BREAKPOINTS = {
   lg: 1024,
 };
 
-const BlogPostCarousel = () => {
+export type CarouselPost = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  coverImage: string;
+};
+
+type BlogPostCarouselProps = {
+  posts: CarouselPost[];
+  heading?: string;
+};
+
+const BlogPostCarousel = ({ posts, heading = "Featured Stories" }: BlogPostCarouselProps) => {
   const [ref, { width }] = useMeasure();
   const [offset, setOffset] = useState(0);
 
@@ -40,15 +54,15 @@ const BlogPostCarousel = () => {
   };
 
   return (
-    <section className="bg-neutral-100 py-8" ref={ref}>
+    <section className="bg-[var(--muted)] py-8" ref={ref}>
       <div className="relative overflow-hidden p-4">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-center justify-between">
-            <h2 className="mb-4 text-4xl">The Team Blog</h2>
+            <h2 className="mb-4 font-serif text-4xl text-[var(--ink)]">{heading}</h2>
 
             <div className="flex items-center gap-2">
               <button
-                className={`rounded-lg border-[1px] border-neutral-400 bg-white p-1.5 text-2xl transition-opacity ${
+                className={`rounded-sm border border-[var(--line)] bg-[var(--paper-raised)] p-1.5 text-2xl transition-opacity text-[var(--ink)] ${
                   CAN_SHIFT_LEFT ? "" : "opacity-30"
                 }`}
                 disabled={!CAN_SHIFT_LEFT}
@@ -57,7 +71,7 @@ const BlogPostCarousel = () => {
                 <FiArrowLeft />
               </button>
               <button
-                className={`rounded-lg border-[1px] border-neutral-400 bg-white p-1.5 text-2xl transition-opacity ${
+                className={`rounded-sm border border-[var(--line)] bg-[var(--paper-raised)] p-1.5 text-2xl transition-opacity text-[var(--ink)] ${
                   CAN_SHIFT_RIGHT ? "" : "opacity-30"
                 }`}
                 disabled={!CAN_SHIFT_RIGHT}
@@ -77,7 +91,7 @@ const BlogPostCarousel = () => {
             className="flex"
           >
             {posts.map((post) => {
-              return <Post key={post.id} {...post} />;
+              return <Post key={post.slug} {...post} />;
             })}
           </motion.div>
         </div>
@@ -86,98 +100,29 @@ const BlogPostCarousel = () => {
   );
 };
 
-const Post = ({ imgUrl, author, title, description }: PostType) => {
+const Post = ({ slug, coverImage, title, excerpt }: CarouselPost) => {
   const [imageError, setImageError] = useState(false);
   return (
-    <div
-      className="relative shrink-0 cursor-pointer transition-transform hover:-translate-y-1"
+    <Link
+      href={`/blogPage/${slug}`}
+      className="relative shrink-0 cursor-pointer transition-transform hover:-translate-y-1 block"
       style={{
         width: CARD_WIDTH,
         marginRight: MARGIN,
       }}
     >
       <Image
-        src={imageError ? "/fallback-image.jpg" : imgUrl}
-        className="mb-3 h-[200px] w-full rounded-lg object-cover"
-        alt={`An image for a fake blog post titled ${title}`}
-        height={100}
-        width={100}
+        src={imageError ? "/fallback-image.jpg" : coverImage}
+        className="mb-3 h-[200px] w-full rounded-md object-cover"
+        alt={title}
+        height={200}
+        width={350}
         onError={() => setImageError(true)}
       />
-      <span className="rounded-md border-[1px] border-neutral-500 px-1.5 py-1 text-xs uppercase text-neutral-500">
-        {author}
-      </span>
-      <p className="mt-1.5 text-lg font-medium">{title}</p>
-      <p className="text-sm text-neutral-500">{description}</p>
-    </div>
+      <p className="mt-1.5 font-serif text-lg font-medium text-[var(--ink)]">{title}</p>
+      <p className="text-sm text-[var(--ink-soft)]">{excerpt}</p>
+    </Link>
   );
 };
 
 export default BlogPostCarousel;
-
-type PostType = {
-  id: number;
-  imgUrl: string;
-  author: string;
-  title: string;
-  description: string;
-};
-
-const posts: PostType[] = [
-  {
-    id: 1,
-    imgUrl: "/imgs/blog/1.png",
-    author: "John Anderson",
-    title: "We built an AI chess bot with ChatGPT",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi, dolor.",
-  },
-  {
-    id: 2,
-    imgUrl: "/imgs/blog/2.png",
-    author: "Kyle Parsons",
-    title: "How to grow your personal brand as a web designer",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi, dolor.",
-  },
-  {
-    id: 3,
-    imgUrl: "/imgs/blog/3.png",
-    author: "Andrea Bates",
-    title: "Calm down, monoliths are totally fine",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi, dolor.",
-  },
-  {
-    id: 4,
-    imgUrl: "/imgs/blog/4.png",
-    author: "Jess Drum",
-    title: "A quick guide to Framer Motion (for dummies)",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi, dolor.",
-  },
-  {
-    id: 5,
-    imgUrl: "/imgs/blog/5.png",
-    author: "Phil White",
-    title: "You probably don't need kubernetes",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi, dolor.",
-  },
-  {
-    id: 6,
-    imgUrl: "/imgs/blog/6.png",
-    author: "Karen Peabody",
-    title: "State of JavaScript in 2024",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi, dolor.",
-  },
-  {
-    id: 7,
-    imgUrl: "/imgs/blog/7.png",
-    author: "Dante Gordon",
-    title: "What's new in Python?",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi, dolor.",
-  },
-];

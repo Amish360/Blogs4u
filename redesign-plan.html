@@ -1,0 +1,563 @@
+<title>Blogs4u Static Redesign</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --paper:#F1EFE7;
+    --paper-raised:#FFFFFF;
+    --ink:#20241F;
+    --ink-soft:#565C52;
+    --ink-faint:#8A8F82;
+    --line:#D8D3C4;
+    --line-soft:#E4E0D3;
+    --keep:#8A6D1F;
+    --keep-bg:#F3ECD4;
+    --remove:#A14B3D;
+    --remove-bg:#F5E4DF;
+    --new:#2F5D62;
+    --new-bg:#E1EAE7;
+    --code-bg:#28251E;
+    --code-ink:#EDE8D9;
+    --shadow: 0 1px 2px rgba(32,36,31,0.06), 0 6px 20px rgba(32,36,31,0.05);
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#181A16;
+      --paper-raised:#212420;
+      --ink:#EDEAE0;
+      --ink-soft:#B6B4A9;
+      --ink-faint:#82806F;
+      --line:#38392F;
+      --line-soft:#2C2E27;
+      --keep:#D9BC66;
+      --keep-bg:#332C15;
+      --remove:#E08C7A;
+      --remove-bg:#3A2620;
+      --new:#7FB8B4;
+      --new-bg:#1D3230;
+      --code-bg:#0F110D;
+      --code-ink:#E8E3D2;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#181A16;
+    --paper-raised:#212420;
+    --ink:#EDEAE0;
+    --ink-soft:#B6B4A9;
+    --ink-faint:#82806F;
+    --line:#38392F;
+    --line-soft:#2C2E27;
+    --keep:#D9BC66;
+    --keep-bg:#332C15;
+    --remove:#E08C7A;
+    --remove-bg:#3A2620;
+    --new:#7FB8B4;
+    --new-bg:#1D3230;
+    --code-bg:#0F110D;
+    --code-ink:#E8E3D2;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 24px rgba(0,0,0,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', -apple-system, Segoe UI, sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--keep-bg); color:var(--ink); }
+
+  a{ color:var(--new); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, button:focus-visible, summary:focus-visible{
+    outline: 2px solid var(--new); outline-offset: 2px; border-radius:2px;
+  }
+
+  h1,h2,h3{ font-family:'Fraunces', Georgia, serif; text-wrap:balance; font-weight:600; color:var(--ink); margin:0; }
+  code, .mono{ font-family:'IBM Plex Mono', Consolas, monospace; }
+
+  .shell{
+    max-width:1180px;
+    margin:0 auto;
+    padding: 0 clamp(20px,4vw,56px) 96px;
+  }
+
+  /* ---------- Header ---------- */
+  header.hero{
+    padding: clamp(40px,6vw,72px) 0 40px;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .eyebrow .dot{ width:6px;height:6px;border-radius:50%;background:var(--keep); }
+  header.hero h1{
+    font-size:clamp(32px,4.6vw,52px);
+    line-height:1.08;
+    max-width:16ch;
+  }
+  header.hero p.lede{
+    margin-top:18px;
+    max-width:62ch;
+    font-size:17px;
+    color:var(--ink-soft);
+  }
+  .hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    margin-top:32px;
+    font-size:13.5px;
+    color:var(--ink-faint);
+  }
+  .hero-meta strong{ color:var(--ink); font-weight:500; }
+
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:28px;
+  }
+  .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:0.04em;
+    padding:4px 9px;
+    border-radius:4px;
+    font-weight:500;
+    white-space:nowrap;
+  }
+  .tag.keep{ background:var(--keep-bg); color:var(--keep); }
+  .tag.remove{ background:var(--remove-bg); color:var(--remove); }
+  .tag.new{ background:var(--new-bg); color:var(--new); }
+
+  /* ---------- Layout: nav + content ---------- */
+  .layout{
+    display:grid;
+    grid-template-columns: 220px minmax(0,1fr);
+    gap:56px;
+    margin-top:44px;
+    align-items:start;
+  }
+  nav.toc{
+    position:sticky;
+    top:24px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    padding-right:8px;
+  }
+  nav.toc a{
+    color:var(--ink-soft);
+    text-decoration:none;
+    font-size:13.5px;
+    padding:7px 10px;
+    border-radius:6px;
+    border-left:2px solid transparent;
+  }
+  nav.toc a:hover{ color:var(--ink); background:var(--paper-raised); }
+  nav.toc .num{ font-family:'IBM Plex Mono',monospace; color:var(--ink-faint); margin-right:8px; font-size:12px; }
+
+  main{ min-width:0; }
+
+  section.phase{
+    padding-top: 8px;
+    margin-bottom:64px;
+    scroll-margin-top: 20px;
+  }
+  section.phase .phase-head{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    margin-bottom:6px;
+  }
+  section.phase .phase-num{
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--ink-faint);
+    font-size:14px;
+  }
+  section.phase h2{ font-size:clamp(22px,2.6vw,28px); }
+  section.phase > p.dek{
+    color:var(--ink-soft);
+    max-width:66ch;
+    margin: 12px 0 24px;
+    font-size:15.5px;
+  }
+
+  .card{
+    background:var(--paper-raised);
+    border:1px solid var(--line-soft);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    padding:22px 24px;
+  }
+  .card + .card{ margin-top:16px; }
+  .card h3{ font-size:16px; margin-bottom:8px; font-family:'IBM Plex Sans'; font-weight:600; }
+  .card p{ margin:0 0 8px; color:var(--ink-soft); font-size:14.5px; }
+  .card p:last-child{ margin-bottom:0; }
+
+  ul.plain{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+  ul.plain li{ display:flex; gap:10px; align-items:flex-start; font-size:14.5px; color:var(--ink-soft); }
+  ul.plain li::before{
+    content:"";
+    width:5px;height:5px;border-radius:50%;
+    background:var(--ink-faint);
+    margin-top:8px;
+    flex-shrink:0;
+  }
+  ul.plain b{ color:var(--ink); font-weight:600; }
+
+  /* table */
+  .table-wrap{ overflow-x:auto; border:1px solid var(--line-soft); border-radius:10px; box-shadow:var(--shadow); }
+  table{ width:100%; border-collapse:collapse; background:var(--paper-raised); font-size:14px; min-width:640px; }
+  thead th{
+    text-align:left;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    padding:12px 16px;
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:12px 16px;
+    border-bottom:1px solid var(--line-soft);
+    color:var(--ink-soft);
+    vertical-align:top;
+  }
+  tbody tr:last-child td{ border-bottom:none; }
+  td.path{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink); white-space:nowrap; }
+  td.status{ white-space:nowrap; }
+
+  /* token / design system swatches */
+  .tokens{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; margin-top:16px; }
+  .swatch{ border:1px solid var(--line-soft); border-radius:10px; overflow:hidden; background:var(--paper-raised); box-shadow:var(--shadow); }
+  .swatch .fill{ height:56px; }
+  .swatch .label{ padding:9px 12px; }
+  .swatch .name{ font-size:12.5px; font-weight:600; }
+  .swatch .hex{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); margin-top:2px; }
+
+  .type-sample{ display:flex; flex-direction:column; gap:22px; margin-top:16px; }
+  .type-row{ display:flex; align-items:baseline; gap:20px; flex-wrap:wrap; }
+  .type-row .role{ font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint); width:120px; flex-shrink:0; }
+  .type-row .sample.display{ font-family:'Fraunces',serif; font-size:30px; font-weight:600; }
+  .type-row .sample.body{ font-family:'IBM Plex Sans'; font-size:16px; color:var(--ink-soft); }
+  .type-row .sample.mono{ font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--ink-soft); }
+
+  pre.code-block{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    border-radius:10px;
+    padding:18px 20px;
+    overflow-x:auto;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.8px;
+    line-height:1.65;
+    box-shadow:var(--shadow);
+  }
+
+  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:720px){ .grid-2{ grid-template-columns:1fr; } }
+
+  .risk{
+    border-left:3px solid var(--remove);
+    background:var(--remove-bg);
+    border-radius:0 8px 8px 0;
+    padding:12px 16px;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .risk b{ color:var(--remove); }
+
+  footer.end{
+    margin-top:60px;
+    padding-top:24px;
+    border-top:1px solid var(--line);
+    color:var(--ink-faint);
+    font-size:13px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  @media (max-width: 880px){
+    .layout{ grid-template-columns:1fr; }
+    nav.toc{
+      position:static;
+      flex-direction:row;
+      flex-wrap:wrap;
+      gap:8px;
+      padding-bottom:8px;
+      border-bottom:1px solid var(--line);
+      margin-bottom:8px;
+    }
+    nav.toc a{ border:1px solid var(--line-soft); }
+  }
+</style>
+
+<div class="shell">
+
+  <header class="hero">
+    <div class="eyebrow"><span class="dot"></span>Migration &amp; redesign plan · Next.js 15 → static</div>
+    <h1>Blogs4u, rebuilt as a static site</h1>
+    <p class="lede">
+      A working plan to take Blogs4u from a Prisma/Postgres-backed Next.js app to a fully static,
+      statically-exported site — content moved to MDX, dynamic auth removed, and the existing
+      component set redesigned in place rather than rebuilt from scratch.
+    </p>
+    <div class="hero-meta">
+      <div><strong>Scope</strong> full static export, no server</div>
+      <div><strong>Content</strong> Markdown/MDX in-repo</div>
+      <div><strong>Account features</strong> removed</div>
+      <div><strong>Design direction</strong> modern minimal / editorial</div>
+    </div>
+    <div class="legend">
+      <span class="tag keep">KEEP · restyle</span>
+      <span class="tag remove">REMOVE</span>
+      <span class="tag new">NEW</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc">
+      <a href="#why"><span class="num">00</span>Why this is a rebuild-in-place</a>
+      <a href="#architecture"><span class="num">01</span>Target architecture</a>
+      <a href="#routes"><span class="num">02</span>Routes: keep / remove</a>
+      <a href="#components"><span class="num">03</span>Component inventory</a>
+      <a href="#content"><span class="num">04</span>Content migration</a>
+      <a href="#design"><span class="num">05</span>Design system</a>
+      <a href="#phases"><span class="num">06</span>Execution phases</a>
+      <a href="#risks"><span class="num">07</span>Risks &amp; open calls</a>
+    </nav>
+
+    <main>
+
+      <section class="phase" id="why">
+        <div class="phase-head"><span class="phase-num">00</span><h2>Why this is a rebuild-in-place, not a rewrite</h2></div>
+        <p class="dek">
+          Blogs4u today is a full-stack app: Next.js App Router pages call route handlers in
+          <code>src/app/api/*</code>, which run Prisma queries against Postgres and set an httpOnly
+          JWT cookie checked by <code>src/middleware.ts</code>. None of that can survive
+          <code>next export</code> — a static build has no server to run a route handler or verify a
+          cookie on. So the plan below removes the backend and account system outright, and keeps
+          every visual component (navbar, footer, blog grid, cards, carousel, hero) as the shell to
+          redesign, rewired to read from static data instead of an API.
+        </p>
+        <div class="card">
+          <h3>What "keeping current components in place" means here</h3>
+          <p>
+            The component files under <code>components/</code> stay — same responsibilities, same
+            names, same place in the tree. What changes is (a) their internals get restyled per the
+            design system in §05, and (b) any component that currently fetches from Redux thunks
+            hitting <code>/api/*</code> gets its data passed in as static props instead.
+          </p>
+        </div>
+      </section>
+
+      <section class="phase" id="architecture">
+        <div class="phase-head"><span class="phase-num">01</span><h2>Target architecture</h2></div>
+        <p class="dek">One build, no runtime server. Content and images live in the repo; every route is pre-rendered to HTML at build time.</p>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Today</h3>
+            <ul class="plain">
+              <li>Next.js SSR/route handlers on a Node host (Vercel)</li>
+              <li>Postgres via Prisma, queried per-request</li>
+              <li>JWT cookie auth, verified in <code>middleware.ts</code></li>
+              <li>Redux Toolkit slices fetch blogs/authors/categories at runtime</li>
+              <li>Cloudinary for uploaded images</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>After</h3>
+            <ul class="plain">
+              <li><code>next.config.ts</code> sets <code>output: "export"</code></li>
+              <li>Blogs, authors, categories as MDX/JSON in <code>content/</code></li>
+              <li>No auth, no cookies, no middleware, no API routes</li>
+              <li>Data read at build time via <code>generateStaticParams</code> + a small content loader — Redux dropped for page data (see §04)</li>
+              <li>Images committed to <code>public/</code> or referenced by static URL; <code>next/image</code> set to unoptimized for export</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="phase" id="routes">
+        <div class="phase-head"><span class="phase-num">02</span><h2>Routes: keep vs. remove</h2></div>
+        <p class="dek">Public, content-facing routes stay and get statically generated. Everything account-gated is deleted, not stubbed.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Route</th><th>Status</th><th>Note</th></tr></thead>
+            <tbody>
+              <tr><td class="path">/ (home)</td><td class="status"><span class="tag keep">KEEP</span></td><td>Static, hero + latest posts pulled from content at build time</td></tr>
+              <tr><td class="path">/blogPage/[id]</td><td class="status"><span class="tag keep">KEEP</span></td><td><code>generateStaticParams</code> over all MDX slugs</td></tr>
+              <tr><td class="path">/author/[id]</td><td class="status"><span class="tag keep">KEEP</span></td><td>Generated from author frontmatter, no live "blogs by author" query</td></tr>
+              <tr><td class="path">/Community, /Community/[id]</td><td class="status"><span class="tag keep">KEEP</span></td><td>Same static treatment as blog pages</td></tr>
+              <tr><td class="path">/FAQ, /Support</td><td class="status"><span class="tag keep">KEEP</span></td><td>Already static in content; just restyled</td></tr>
+              <tr><td class="path">/login, /Signup</td><td class="status"><span class="tag remove">REMOVE</span></td><td>No auth backend to call</td></tr>
+              <tr><td class="path">/MyAccount, /MyAccount/EditProfile</td><td class="status"><span class="tag remove">REMOVE</span></td><td>Depends on session + profile mutation API</td></tr>
+              <tr><td class="path">/MyBlogs, /createBlog</td><td class="status"><span class="tag remove">REMOVE</span></td><td>Depends on authenticated write API</td></tr>
+              <tr><td class="path">/api/*  (all route handlers)</td><td class="status"><span class="tag remove">REMOVE</span></td><td>No server at runtime for a static export</td></tr>
+              <tr><td class="path">src/middleware.ts</td><td class="status"><span class="tag remove">REMOVE</span></td><td>Nothing left to gate</td></tr>
+              <tr><td class="path">prisma/, DB connection</td><td class="status"><span class="tag remove">REMOVE</span></td><td>Content moves to MDX — see §04</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="phase" id="components">
+        <div class="phase-head"><span class="phase-num">03</span><h2>Component inventory</h2></div>
+        <p class="dek">Every one of these stays in the tree. "Restyle" means new spacing/type/color per §05 with the same props contract; "rewire" means it also needs its data source swapped from a Redux thunk to a static prop.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Component</th><th>Action</th><th>Change needed</th></tr></thead>
+            <tbody>
+              <tr><td class="path">navbar.tsx</td><td class="status"><span class="tag keep">RESTYLE</span></td><td>Drop the logged-in username branch; keep the rest of the nav shell</td></tr>
+              <tr><td class="path">footer.tsx</td><td class="status"><span class="tag keep">RESTYLE</span></td><td>Visual pass only</td></tr>
+              <tr><td class="path">herosection.tsx</td><td class="status"><span class="tag keep">RESTYLE</span></td><td>Visual pass only</td></tr>
+              <tr><td class="path">blogsGrid.tsx</td><td class="status"><span class="tag keep">REWIRE + RESTYLE</span></td><td>Read posts from static content list instead of a Redux/API fetch</td></tr>
+              <tr><td class="path">blogPostCarousel.tsx, carousel.tsx</td><td class="status"><span class="tag keep">REWIRE + RESTYLE</span></td><td>Same — feed it a static "featured" list</td></tr>
+              <tr><td class="path">authors.tsx</td><td class="status"><span class="tag keep">REWIRE + RESTYLE</span></td><td>Read from authors content collection</td></tr>
+              <tr><td class="path">communityCard.tsx</td><td class="status"><span class="tag keep">RESTYLE</span></td><td>Visual pass only</td></tr>
+              <tr><td class="path">clientLayoutWrapper.tsx</td><td class="status"><span class="tag keep">SIMPLIFY</span></td><td>Drop any auth-state branching it does around nav/footer</td></tr>
+              <tr><td class="path">components/ui/* (button, card, input, avatar, label, radio-group, skeleton)</td><td class="status"><span class="tag keep">RESTYLE</span></td><td>Re-theme the shadcn/Radix primitives to the new tokens; keep the API surface</td></tr>
+              <tr><td class="path">login/signup form components</td><td class="status"><span class="tag remove">REMOVE</span></td><td>No destination route left to render them on</td></tr>
+              <tr><td class="path">redux/slices/authSlice, blogs/authors/categories thunks</td><td class="status"><span class="tag remove">REMOVE</span></td><td>Static props replace runtime fetching; see §04</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="phase" id="content">
+        <div class="phase-head"><span class="phase-num">04</span><h2>Content migration: DB → MDX</h2></div>
+        <p class="dek">One-time export of the current Postgres tables into files, then a thin build-time loader that replaces the Prisma queries the API routes used to run.</p>
+
+        <div class="card">
+          <h3>Proposed structure</h3>
+          <pre class="code-block">content/
+  blogs/
+    my-first-post.mdx
+    another-post.mdx
+  authors/
+    jane-doe.mdx
+  categories/
+    categories.json</pre>
+        </div>
+
+        <div class="card">
+          <h3>Blog frontmatter (mirrors the current Prisma <code class="mono">Blog</code> model)</h3>
+          <pre class="code-block">---
+title: "..."
+slug: "my-first-post"
+author: "jane-doe"
+category: "..."
+coverImage: "/images/blogs/my-first-post.jpg"
+publishedAt: "2026-08-01"
+excerpt: "..."
+---
+
+MDX body content here.</pre>
+        </div>
+
+        <ul class="plain">
+          <li><b>Export script:</b> a one-off Node script reads the existing Postgres DB via Prisma (before it's removed) and writes one <code>.mdx</code> file per blog and one per author, mapping columns straight to frontmatter fields.</li>
+          <li><b>Loader:</b> a small <code>lib/content.ts</code> using <code>gray-matter</code> + <code>next-mdx-remote</code> (or <code>contentlayer</code>/<code>velite</code> if you want typed content) replaces every place a component currently calls a Redux thunk.</li>
+          <li><b>Images:</b> Cloudinary URLs get downloaded into <code>public/images/...</code> during the export script, or left as absolute Cloudinary URLs if you're fine keeping that one external dependency.</li>
+          <li><b>Redux Toolkit:</b> drop the store entirely if nothing else needs client state, or keep a trimmed store for pure UI state (e.g. a mobile nav toggle) with the data slices removed.</li>
+        </ul>
+      </section>
+
+      <section class="phase" id="design">
+        <div class="phase-head"><span class="phase-num">05</span><h2>Design system for the redesign</h2></div>
+        <p class="dek">Tailwind v4 and the shadcn/Radix component layer stay — only the tokens change. Use this as the palette/type/spacing reference while restyling each component in §03.</p>
+
+        <div class="card">
+          <h3>Color</h3>
+          <div class="tokens">
+            <div class="swatch"><div class="fill" style="background:#F1EFE7"></div><div class="label"><div class="name">Paper</div><div class="hex">#F1EFE7</div></div></div>
+            <div class="swatch"><div class="fill" style="background:#20241F"></div><div class="label"><div class="name">Ink</div><div class="hex">#20241F</div></div></div>
+            <div class="swatch"><div class="fill" style="background:#565C52"></div><div class="label"><div class="name">Ink soft</div><div class="hex">#565C52</div></div></div>
+            <div class="swatch"><div class="fill" style="background:#8A6D1F"></div><div class="label"><div class="name">Accent — mustard</div><div class="hex">#8A6D1F</div></div></div>
+            <div class="swatch"><div class="fill" style="background:#2F5D62"></div><div class="label"><div class="name">Accent — teal (links)</div><div class="hex">#2F5D62</div></div></div>
+            <div class="swatch"><div class="fill" style="background:#A14B3D"></div><div class="label"><div class="name">Accent — rust (status)</div><div class="hex">#A14B3D</div></div></div>
+          </div>
+          <p style="margin-top:14px;">
+            Paper + ink carry the reading experience; teal is the one interactive color (links, active
+            nav, primary buttons). Mustard and rust are reserved for status/meta use — category tags,
+            "new" badges — not decoration.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Type</h3>
+          <div class="type-sample">
+            <div class="type-row"><div class="role">Display</div><div class="sample display">Fraunces — post titles, hero</div></div>
+            <div class="type-row"><div class="role">Body</div><div class="sample body">IBM Plex Sans — nav, body copy, cards</div></div>
+            <div class="type-row"><div class="role">Utility / mono</div><div class="sample mono">IBM Plex Mono — dates, tags, byline meta</div></div>
+          </div>
+          <p style="margin-top:18px;">
+            Body copy sits near 65 characters wide on the blog detail page. Fraunces carries personality
+            at large display sizes (H1/H2 on post titles and the homepage hero) without being used for
+            running text, where Plex Sans stays legible at 16px.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Layout</h3>
+          <p>
+            Reading-focused single column for post detail (max 68ch), responsive 2–3 column grid for
+            blog/community listing, generous vertical rhythm (24/40/64px scale) instead of the current
+            tighter spacing — matches the "modern minimal / editorial" direction picked for this
+            redesign.
+          </p>
+        </div>
+      </section>
+
+      <section class="phase" id="phases">
+        <div class="phase-head"><span class="phase-num">06</span><h2>Execution phases</h2></div>
+        <p class="dek">Ordered so the site stays buildable at the end of each phase.</p>
+        <ul class="plain">
+          <li><b>Phase 1 — Content export.</b> Write the Prisma → MDX export script, run it once against the current DB, commit the output under <code>content/</code>. Verify counts match the DB (blog count, author count, category count).</li>
+          <li><b>Phase 2 — Strip the backend.</b> Delete <code>src/app/api/*</code>, <code>src/middleware.ts</code>, <code>prisma/</code>, auth-related Redux slices and thunks, <code>login</code>/<code>Signup</code>/<code>MyAccount</code>/<code>MyBlogs</code>/<code>createBlog</code> routes. Remove <code>bcrypt</code>, <code>jsonwebtoken</code>/<code>jose</code>, <code>@nestjs/*</code>, <code>passport*</code>, <code>express</code>, <code>@prisma/client</code>, <code>prisma</code> from <code>package.json</code>.</li>
+          <li><b>Phase 3 — Static data loader.</b> Add <code>lib/content.ts</code> (MDX + frontmatter parsing), rewire <code>blogsGrid</code>, carousels, <code>authors.tsx</code>, and the detail pages to read from it via <code>generateStaticParams</code>/build-time props.</li>
+          <li><b>Phase 4 — Config for export.</b> Set <code>output: "export"</code> in <code>next.config.ts</code>, <code>images: { unoptimized: true }</code>, confirm no remaining dynamic route (<code>route.ts</code>, <code>middleware.ts</code>) or use of <code>headers()</code>/<code>cookies()</code> blocks the export.</li>
+          <li><b>Phase 5 — Redesign pass.</b> Apply the token system in §05 across the component inventory in §03: Tailwind config tokens first, then component-by-component restyle, starting with navbar/footer (seen on every page) then the post detail template, then listing/grid pages.</li>
+          <li><b>Phase 6 — Build &amp; deploy.</b> <code>next build</code> produces static <code>out/</code>; deploy to GitHub Pages/Netlify/Cloudflare Pages. Add the corresponding CI workflow (none exists today).</li>
+        </ul>
+      </section>
+
+      <section class="phase" id="risks">
+        <div class="phase-head"><span class="phase-num">07</span><h2>Risks &amp; open calls</h2></div>
+        <div class="card">
+          <div class="risk"><b>One-way door on content editing.</b> Once the DB is dropped, publishing a new post means adding an MDX file and rebuilding — there's no in-browser "createBlog" anymore. Confirm this workflow is acceptable before deleting Prisma.</div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+          <div class="risk"><b>Cloudinary images.</b> Decide before Phase 1 whether images get downloaded into <code>public/</code> (fully static, no external dependency) or left as Cloudinary URLs (keeps one external service alive).</div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+          <div class="risk"><b>Leftover auth scaffolding.</b> <code>express</code>, <code>@nestjs/jwt</code>, <code>@nestjs/passport</code>, <code>passport-jwt</code> are in <code>package.json</code> but weren't confirmed wired into the Next app — worth a quick check before Phase 2 in case something outside <code>src/</code> depends on them.</div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="end">
+    <span>Blogs4u — static redesign plan</span>
+    <span>Reference doc, not a build script — work through phases 1–6 in order.</span>
+  </footer>
+
+</div>
